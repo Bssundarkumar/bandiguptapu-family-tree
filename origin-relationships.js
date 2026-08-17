@@ -11,20 +11,39 @@
     }
     return p;
   };
-  const SOURCE='Original Bandiguptapu genealogy PDF — relationship inferred from the visible green parent/child connector line.';
-  const narasappa=ensure('narasappa',{fullName:'Narasappa',surname:'Bandi / Bandiguptapu tradition',gender:'Male',generationHint:0,parents:[],spouses:[],children:['hist-reddappa-1','hist-perappa-2','hist-achappa-1','hist-venkappa-3'],confidence:'familyrecord',sourceAudit:'pdf-verified-connector',sourceNote:SOURCE});
-  const sons=[
-    ['hist-reddappa-1','Reddappa','Senanayakudu / troop leader'],
-    ['hist-perappa-2','Perappa','Recorded martial / administrative role'],
-    ['hist-achappa-1','Achappa','Disciplinary / enforcement role'],
-    ['hist-venkappa-3','Venkappa','Messenger / diplomatic duty']
-  ];
-  for(const [id,name,occupation] of sons){
-    const p=ensure(id,{fullName:name,surname:'Bandiguptapu',gender:'Male',occupation,generationHint:1,parents:['narasappa'],spouses:[],children:[],confidence:'familyrecord',sourceAudit:'pdf-verified-connector',sourceNote:SOURCE});
-    p.parents=uniq([...(p.parents||[]),'narasappa']);
+  const SOURCE='Original Bandiguptapu genealogy PDF — visible top connector shows Venkatrayudu as first generation and Ramappa as his son.';
+
+  // Correct PDF root.
+  const root=ensure('hist-venkatrayudu-1',{
+    fullName:'Venkatrayudu',surname:'Bandiguptapu',gender:'Male',generationHint:0,
+    parents:[],spouses:[],children:['hist-ramappa-1'],confidence:'familyrecord',
+    sourceAudit:'pdf-verified-connector',sourceNote:SOURCE
+  });
+  const ramappa=ensure('hist-ramappa-1',{
+    fullName:'Ramappa',surname:'Bandiguptapu',gender:'Male',generationHint:1,
+    parents:['hist-venkatrayudu-1'],spouses:[],children:[],confidence:'familyrecord',
+    sourceAudit:'pdf-verified-connector',sourceNote:SOURCE
+  });
+  root.children=uniq([...(root.children||[]),'hist-ramappa-1']);
+  ramappa.parents=uniq([...(ramappa.parents||[]),'hist-venkatrayudu-1']);
+
+  // Remove the old, incorrect Narasappa-root relationship introduced by an earlier build.
+  const nar=byId('narasappa');
+  if(nar){
+    nar.parents=(nar.parents||[]).filter(id=>id!=='hist-venkatrayudu-1'&&id!=='hist-ramappa-1');
+    nar.generationHint=Math.max(2,Number.isFinite(+nar.generationHint)?+nar.generationHint:2);
+    nar.sourceAudit=nar.sourceAudit==='pdf-verified-connector'?'pdf-structure-pending':nar.sourceAudit;
+    nar.sourceNote='Historical Narasappa record retained; exact upstream connector will be assigned only where confirmed from the PDF.';
   }
-  narasappa.children=uniq([...(narasappa.children||[]),...sons.map(x=>x[0])]);
+  const oldSons=['hist-reddappa-1','hist-perappa-2','hist-achappa-1','hist-venkappa-3'];
+  if(nar) nar.children=(nar.children||[]).filter(id=>!oldSons.includes(id));
+  for(const id of oldSons){
+    const p=byId(id); if(!p) continue;
+    p.parents=(p.parents||[]).filter(pid=>pid!=='narasappa');
+    if(p.sourceAudit==='pdf-verified-connector')p.sourceAudit='pdf-structure-pending';
+  }
+
   try{if(typeof repairRelationships==='function')repairRelationships(false)}catch(e){}
-  try{sset(KEY,JSON.stringify({version:10,updatedAt:new Date().toISOString(),people,relationshipIntegrity:true,pdfConnectorMapping:true}))}catch(e){}
+  try{sset(KEY,JSON.stringify({version:12,updatedAt:new Date().toISOString(),people,relationshipIntegrity:true,pdfRootCorrected:true}))}catch(e){}
   try{render()}catch(e){console.error('Origin relationship render',e)}
 })();
