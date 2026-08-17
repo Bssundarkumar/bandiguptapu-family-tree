@@ -3,6 +3,12 @@
   const ensure=(data)=>{
     let p=byId(data.id);
     if(!p){ p=normalize(data); people.push(p); }
+    // Apply authoritative family-confirmed corrections while preserving unrelated details.
+    for(const [k,v] of Object.entries(data)){
+      if(['parents','children','spouses','related','id'].includes(k)) continue;
+      if(v!==undefined && v!==null && v!=='') p[k]=v;
+    }
+    for(const key of ['parents','children','spouses','related']) p[key]=uniq([...(p[key]||[]),...(data[key]||[])]);
     return p;
   };
 
@@ -12,31 +18,31 @@
     dob:'1986-12-13', ancestralVillage:'Allavaram',
     education:'M.B.A. — recorded in inherited genealogy', generationHint:6,
     parents:['veera-venkata-satyanarayana','naga-satya-mani'],
-    spouses:[], children:[], confidence:'familyrecord',
+    spouses:['gummalla-jhansi-veera-durga-padma-jyothi'], children:['subhash-child-1','subhash-child-2'], confidence:'familyrecord',
     sourceNote:'Inherited genealogy records Venkata Siva Subhash, M.B.A., 13-12-1986.'
   });
 
   const spouse=ensure({
     id:'gummalla-jhansi-veera-durga-padma-jyothi',
     fullName:'Jhansi Veera Durga Padma Jyothi', surname:'Gummalla', gender:'Female',
-    generationHint:6, parents:[], spouses:['venkata-siva-subhash'], children:[],
+    generationHint:6, parents:[], spouses:['venkata-siva-subhash'], children:['subhash-child-1','subhash-child-2'],
     confidence:'familyrecord',
-    sourceNote:'Name transcribed from the inherited genealogy beside Venkata Siva Subhash.'
+    sourceNote:'Spouse name is visible in the inherited genealogy beside Venkata Siva Subhash.'
   });
 
   const child1=ensure({
-    id:'subhash-child-1', fullName:'Child 1', surname:'Bandiguptapu', gender:'',
+    id:'subhash-child-1', fullName:'Sreshta', surname:'Bandiguptapu', gender:'',
     generationHint:7, parents:['venkata-siva-subhash','gummalla-jhansi-veera-durga-padma-jyothi'],
-    spouses:[], children:[], confidence:'familyrecord',
-    notes:'The genealogy shows this child box, but the child name is not readable/recorded in the available source image.',
-    sourceNote:'Inherited genealogy — child box shown below Venkata Siva Subhash.'
+    spouses:[], children:[], confidence:'confirmed',
+    notes:'Child name supplied and confirmed by family. The corresponding child box is present in the genealogy image but the name is not legible in the rendered source.',
+    sourceNote:'Family-confirmed name; child position is shown in inherited genealogy.'
   });
   const child2=ensure({
-    id:'subhash-child-2', fullName:'Child 2', surname:'Bandiguptapu', gender:'',
+    id:'subhash-child-2', fullName:'Varnisha', surname:'Bandiguptapu', gender:'',
     generationHint:7, parents:['venkata-siva-subhash','gummalla-jhansi-veera-durga-padma-jyothi'],
-    spouses:[], children:[], confidence:'familyrecord',
-    notes:'The genealogy shows this child box, but the child name is not readable/recorded in the available source image.',
-    sourceNote:'Inherited genealogy — child box shown below Venkata Siva Subhash.'
+    spouses:[], children:[], confidence:'confirmed',
+    notes:'Child name supplied and confirmed by family. The corresponding child box is present in the genealogy image but the name is not legible in the rendered source.',
+    sourceNote:'Family-confirmed name; child position is shown in inherited genealogy.'
   });
 
   subhash.spouses=uniq([...(subhash.spouses||[]),spouse.id]);
@@ -50,6 +56,6 @@
   for(const p of [father,mother]) if(p) p.children=uniq([...(p.children||[]),subhash.id]);
   subhash.parents=uniq([...(subhash.parents||[]),'veera-venkata-satyanarayana','naga-satya-mani']);
 
-  try{sset(KEY,JSON.stringify({version:6,updatedAt:new Date().toISOString(),people,relationshipIntegrity:true}))}catch(e){}
+  try{sset(KEY,JSON.stringify({version:8,updatedAt:new Date().toISOString(),people,relationshipIntegrity:true}))}catch(e){}
   try{render()}catch(e){console.error('Subhash family patch render',e)}
 })();
