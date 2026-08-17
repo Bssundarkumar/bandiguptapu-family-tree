@@ -1,0 +1,72 @@
+option><option>Male</option><option>Female</option><option>Other</option></select></div><div class="field"><label>Date of birth</label><input id="dob" type="date"/></div>
+<div class="field"><label>Approx birth year</label><input id="birthYear" inputmode="numeric"/></div><div class="field"><label>Date of death</label><input id="dod" type="date"/></div>
+<div class="field"><label>Birthplace</label><input id="birthplace"/></div><div class="field"><label>Ancestral village</label><input id="ancestralVillage"/></div>
+<div class="field"><label>Residence</label><input id="residence"/></div><div class="field"><label>Occupation / role</label><input id="occupation"/></div>
+<div class="field"><label>Education</label><input id="education"/></div><div class="field"><label>Gotram</label><input id="gotram"/></div>
+<div class="field"><label>Family deity</label><input id="deity"/></div><div class="field"><label>Confidence</label><select id="confidence"><option value="confirmed">Confirmed</option><option value="familyrecord">Family genealogy record</option><option value="tradition">Family tradition / unverified</option><option value="unknown">Unknown</option></select></div>
+<div class="field full"><label>Notes / family story</label><textarea id="notes"></textarea></div><div class="field full"><label>Source / evidence</label><textarea id="sourceNote"></textarea></div>
+</div><div class="drawerFoot"><button type="button" class="btn" id="deleteBtn" style="margin-right:auto;color:var(--red);display:none">Delete</button><button type="button" class="btn" id="cancelBtn">Cancel</button><button class="btn primary">Save person</button></div></form></section></div>
+<input type="file" id="importFile" accept="application/json" hidden/>
+<div class="toast" id="toast"></div>
+
+<script>
+const PDF_ARCHIVE = {
+  title:'Bandiguptapu Vari Vamsavruksham',
+  source:'Inherited Bandiguptapu family genealogy (2017 PDF)',
+  gotram:'Kousika / Sri Vatsa gotram wording appears in source; family-confirmed spelling: Kalsipala Sri Vatsa Gotram',
+  deity:'Masenemma / Masenekamma Ammavaru',
+  originStory:'Family record states that the earlier family name was Bandi; Narasappa came from Peddapuram Fort to Devaguptam Fort as Senadhipathi. It records later descendants in military, administrative, agricultural and trading roles, and records migrations to multiple Andhra localities.',
+  rawLines:[
+    'Family gotram / deity / guru details are recorded at the head of the genealogy.',
+    'Narasappa: family record says he came from Peddapuram fort to Devaguptam fort as Senadhipathi.',
+    'The document records numerous early military specialities including sword, shield, horse riding, wrestling, fort command, army command and cannon/firearm expertise.',
+    'The genealogy records branches leaving Peddapuram toward Rajavommangi/Rajanagaram-area locations, Nuzvid fort and other settlements.',
+    'A group is described as Sardars under the Maharaja of Peddapuram.',
+    'Later branches are recorded at Narasapuram, Enugupalli, Mogalturu/Kalipatnam, Eluru/Pulla, Tadimalla Madhavaram, Allavaram and other places.',
+    'The Allavaram branch includes Chitti Venkanna + Merikela Venkata Subbamma; Venkata Subbarao (Teacher, 1929–2000) + Motupalli Sundara Manikyam; and later descendants.',
+    'Veera Venkata Satyanarayana (Sattibabu), 08-08-1966 + Kankipati Naga Satya Mani is recorded.',
+    'Satya Sundar Kumar, M.S. (U.S.A.) appears in the inherited record; the source carries a date that conflicts with the family-confirmed DOB, so the confirmed DOB is used in this app.'
+  ]
+};
+
+// Every readable named entry transcribed from the inherited genealogy is seeded below.
+// Where the source layout does not allow a relationship to be established safely, the
+// record is still preserved with its branch/migration note instead of inventing a parent.
+const HISTORICAL_IMPORT = [
+ ['hist-venkatrayudu-1','Venkatrayudu','Shield / martial skill','Early Peddapuram military branch',0],
+ ['hist-ramappa-1','Ramappa','Wrestling / combat','Early Peddapuram military branch',0],
+ ['hist-paddappa-1','Paddappa','Senadhipathi / troop command','Early Peddapuram military branch',0],
+ ['hist-ramappa-2','Ramappa','Fort Senadhipathi','Early Peddapuram military branch',0],
+ ['hist-rajappa-1','Rajappa','Malla-yuddham / wrestling','Early Peddapuram military branch',0],
+ ['hist-venkappa-1','Venkappa','Shield training','Early Peddapuram military branch',1],
+ ['hist-perappa-1','Perappa','Martial skill','Early Peddapuram military branch',1],
+ ['hist-venkappa-2','Venkappa','Horse riding','Early Peddapuram military branch',1],
+ ['hist-devappa-1','Devappa','Sword fighting','Early Peddapuram military branch',1],
+ ['hist-subbappa-1','Subbappa','Spear / weapon skill','Early Peddapuram military branch',1],
+ ['hist-narasappa-2','Narasappa','Martial skill','Early Peddapuram military branch',1],
+ ['hist-reddappa-1','Reddappa','Senanayakudu / troop leader','Early Peddapuram military branch',1],
+ ['hist-perappa-2','Perappa','Recorded martial/administrative role','Early Peddapuram military branch',1],
+ ['hist-achappa-1','Achappa','Disciplinary / enforcement role','Early Peddapuram military branch',1],
+ ['hist-venkappa-3','Venkappa','Messenger / diplomatic duty','Early Peddapuram military branch',1],
+ ['hist-venkatrayudu-2','Venkatrayudu','Malla-yuddham / wrestling','Devaguptam-related branch',1],
+ ['hist-nagappa-1','Nagappa','Shield training','Devaguptam-related branch',1],
+ ['hist-venkatesh-1','Venkatesh','Pettandar / local authority','Devaguptam-related branch',1],
+ ['hist-paramesh-1','Paramesh','Agriculture','Devaguptam-related branch',1],
+ ['hist-paddappa-2','Paddappa','Service near Raja','Devaguptam-related branch',1],
+ ['hist-ramappa-3','Ramappa','Danedar / local official','Devaguptam-related branch',1],
+ ['hist-narasappa-3','Narasappa','Senadhipathi at Devaguptam fort (as recorded)','Devaguptam-related branch',1],
+ ['hist-ramappa-4','Ramappa','Horse riding','Devaguptam-related branch',1],
+ ['hist-narasappa-4','Narasappa','Shield / sword martial skill','Devaguptam-related branch',1],
+ ['hist-nagappa-2','Nagappa','Martial skill','Devaguptam-related branch',1],
+ ['hist-venkappa-4','Venkappa','Horse riding','Peddapuram migration branch',1],
+ ['hist-paddappa-3','Paddappa','Cannon/firearm expertise','Peddapuram migration branch',1],
+ ['hist-narasappa-5','Narasappa','Sword fighting','Peddapuram migration branch',1],
+ ['hist-subbappa-2','Subbappa','Ceremonial / martial role','Peddapuram migration branch',1],
+ ['hist-devappa-2','Devappa','Revenue / collection role','Peddapuram migration branch',1],
+ ['hist-nagappa-3','Nagappa','Temple festival duties','Peddapuram migration branch',1],
+ ['hist-timmappa-1','Timmappa','Troop leadership','Peddapuram migration branch',1],
+ ['hist-reddappa-2','Reddappa','Recorded martial role','Peddapuram migration branch',1],
+ ['hist-peddappa-1','Peddappa','Martial skill','Peddapuram migration branch',1],
+ ['hist-peddappa-2','Peddappa','Horse riding','Nuzvid fort migration branch',1],
+ ['hist-venkappa-5','Venkappa','Fort Senadhipathi','Nuzvid fort migration branch',1],
+ ['hist-ramappa-5','Ramappa','Martial skill','Nu
