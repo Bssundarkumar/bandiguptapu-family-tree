@@ -1,0 +1,160 @@
+    n('వెంకప్ప', {title:'కుస్తీకి వస్తాడు'}),
+    n('రాజప్ప', {title:'దండుకు సేనాధిపతి'})
+  ]}),
+  n('నాగప్ప', {title:'దేవస్థాన ఉత్సవముల చేయుటకు నేర్పరి'}),
+  n('తిమ్మప్ప', {title:'దండు సేనలు నడిపించుటకు వస్తాడు'}),
+  n('రెడ్డప్ప', {title:'బోండకొరతలు వేయుటకు వస్తాడు'}),
+  n('పెద్దప్ప', {title:'అలుగు విద్యకు వస్తాడు'})
+]});
+
+// TRUE apex of the whole chart: వెంక్ట్రాయుడు -> రామప్ప -> (పద్దప్ప, నరసప్ప, వెంకప్ప, ...)
+// Confirmed directly from the source scan: a single horizontal spine runs from
+// రామప్ప (son of వెంక్ట్రాయుడు) across the full width of the page, and పద్దప్ప,
+// నరసప్ప, and వెంకప్ప (గ్రధ్రుప్యాలికి) all hang off that same spine as siblings.
+const trueRoot = n('వెంక్ట్రాయుడు', {title:'డాలుకత్తికి వస్తాడు', children:[
+  n('రామప్ప', {title:'కుస్తీకి వస్తాడు', note:'ఈ ముగ్గురు కుమారుల స్థానం spine ద్వారా నిర్ధారించబడింది. "వెంకప్ప (గ్రధ్రుప్యాలికి)" శాఖ స్థానం ఇంకా నిర్ధారణ కాలేదు కాబట్టి ఇక్కడ చేర్చలేదు — a 4th possible branch (వెంకప్ప గ్రధ్రుప్యాలికి) exists in the source but its exact attachment point is unconfirmed, so it is kept as a separate flagged tab rather than merged here.', children:[
+    branch1, branch2, branch4
+  ]})
+]});
+
+const branches = {
+  full:{label:'★ పూర్తి వృక్షం · Full tree (వెంక్ట్రాయుడు నుండి)', root:trueRoot, enabled:true},
+  b1:{label:'1. పద్దప్ప కుటుంబం', root:branch1, enabled:true},
+  b2:{label:'2. నరసప్ప కుటుంబం', root:branch2, enabled:true},
+  b4:{label:'3. వెంకప్ప (గుర్రపుస్వారీకి) కుటుంబం', root:branch4, enabled:true},
+  b3:{label:'⚠ వెంకప్ప (గ్రధ్రుప్యాలికి) — స్థానం అనిశ్చితం', root:branch3, enabled:true},
+  b5:{label:'మిగిలిన శాఖలు', root:null, enabled:false},
+};
+
+/* ---------------- INDEX (for search & parent lookups) ---------------- */
+const index = {}; // id -> {node, parent, branchKey}
+function buildIndex(node, parent, branchKey){
+  index[node.id] = {node, parent, branchKey};
+  (node.children||[]).forEach(c => buildIndex(c, node, branchKey));
+}
+Object.entries(branches).forEach(([key,b])=>{ if(b.root) buildIndex(b.root, null, key); });
+function reindexActive(){
+  for(const k in index) delete index[k];
+  const b = branches[activeBranch];
+  if(b.root) buildIndex(b.root, null, activeBranch);
+}
+
+/* ---------------- RENDER TABS ---------------- */
+const tabsEl = document.getElementById('tabs');
+let activeBranch = 'full';
+Object.entries(branches).forEach(([key,b])=>{
+  const t = document.createElement('div');
+  t.className = 'tab telugu' + (key===activeBranch?' active':'') + (!b.enabled?' disabled':'');
+  t.textContent = b.label;
+  t.title = b.enabled ? '' : 'ఇంకా transcribe చేయలేదు — not yet transcribed';
+  if(b.enabled){
+    t.addEventListener('click', ()=>{ activeBranch = key; renderAll(); });
+  }
+  tabsEl.appendChild(t);
+});
+
+/* ---------------- RENDER TREE ---------------- */
+const canvas = document.getElementById('canvas');
+
+function nodeBoxHTML(node, isRoot){
+  const classes = ['node'];
+  if(isRoot) classes.push('root');
+  if(node.placeholder) classes.push('placeholder');
+  const titleHTML = node.title ? `<span class="n-title telugu">${node.title}</span>` : (node.dates ? `<span class="n-title">${node.dates}</span>` : '');
+  return `<div class="${classes.join(' ')} telugu" data-id="${node.id}">${node.name}${titleHTML}</div>`;
+}
+
+function renderNode(node, isRoot=false){
+  let slot = `<div class="node-slot">${nodeBoxHTML(node, isRoot)}`;
+  if(node.spouse){
+    slot += `<span class="spouse-link"></span><div class="node spouse telugu" data-id="${node.id}-spouse">${node.spouse.name}${node.spouse.title?`<span class="n-title telugu">${node.spouse.title}</span>`:''}</div>`;
+  }
+  slot += `</div>`;
+  let childrenHTML = '';
+  if(node.children && node.children.length){
+    childrenHTML = `<ul>${node.children.map(c=>`<li>${renderNode(c)}</li>`).join('')}</ul>`;
+  }
+  return slot + childrenHTML;
+}
+
+function renderAll(preserveView){
+  // tabs active state
+  [...tabsEl.children].forEach((t,i)=>{
+    const key = Object.keys(branches)[i];
+    t.classList.toggle('active', key===activeBranch);
+  });
+
+  const b = branches[activeBranch];
+  if(!b.root){
+    canvas.innerHTML = `<div class="empty-branch telugu">ఈ శాఖ ఇంకా transcribe చేయలేదు.<br><br><span style="font-family:'Fraunces',serif; font-style:italic; color:var(--ink-soft); font-size:14px;">This branch hasn't been transcribed from the original chart yet — tell Claude which ancestor to zoom in on next and it'll be added here.</span></div>`;
+    return;
+  }
+  reindexActive();
+  canvas.innerHTML = `<ul class="tree"><li>${renderNode(b.root, true)}</li></ul>`;
+  if(!preserveView) resetZoom();
+  attachNodeHandlers();
+}
+
+/* ---------------- NODE CLICK -> DETAIL PANEL ---------------- */
+function attachNodeHandlers(){
+  canvas.querySelectorAll('.node').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      canvas.querySelectorAll('.node.highlight').forEach(x=>x.classList.remove('highlight'));
+      el.classList.add('highlight');
+      const id = el.dataset.id.replace('-spouse','');
+      showPanel(id, el.dataset.id.endsWith('-spouse'));
+    });
+  });
+}
+
+function showPanel(id, isSpouse){
+  const entry = index[id];
+  const panel = document.getElementById('panel');
+  if(!entry){ return; }
+  const node = entry.node;
+  const displayName = isSpouse && node.spouse ? node.spouse.name : node.name;
+  const displayTitle = isSpouse && node.spouse ? (node.spouse.title||'') : (node.title||'');
+
+  let childrenList = '';
+  if(node.children && node.children.length){
+    childrenList = `<div class="p-section"><h5>Children · పిల్లలు</h5><div>${node.children.map(c=>`<span class="pill-link telugu" data-jump="${c.id}">${c.name}</span>`).join('')}</div></div>`;
+  }
+  let parentHTML = '';
+  if(entry.parent){
+    parentHTML = `<div class="p-section"><h5>Parent · తండ్రి</h5><div><span class="pill-link telugu" data-jump="${entry.parent.id}">${entry.parent.name}</span></div></div>`;
+  }
+  let spouseHTML = '';
+  if(node.spouse && !isSpouse){
+    spouseHTML = `<div class="p-section"><h5>Spouse · భార్య/భర్త</h5><p>${node.spouse.name}${node.spouse.title?` — ${node.spouse.title}`:''}</p></div>`;
+  }
+  let noteHTML = node.note ? `<div class="p-section"><h5>Note · గమనిక</h5><div class="p-note">${node.note}</div></div>` : '';
+
+  const editButtons = isSpouse ? '' : `
+    <div class="p-section p-edit-actions">
+      <h5>Add · జోడించు</h5>
+      <div class="edit-btn-row">
+        <button class="edit-btn" data-action="son" data-id="${node.id}">+ కొడుకు<br><span>Son</span></button>
+        <button class="edit-btn" data-action="spouse" data-id="${node.id}">+ జీవిత భాగస్వామి<br><span>Spouse</span></button>
+        ${entry.parent ? `<button class="edit-btn" data-action="sibling" data-id="${node.id}">+ తోబుట్టువు<br><span>Sibling</span></button>` : ''}
+      </div>
+      <div id="edit-form-slot"></div>
+    </div>`;
+
+  panel.innerHTML = `
+    <h3 class="telugu">${displayName}</h3>
+    ${displayTitle?`<div class="p-title telugu">${displayTitle}</div>`:''}
+    ${node.dates?`<div class="p-dates">${node.dates}</div>`:''}
+    ${parentHTML}
+    ${spouseHTML}
+    ${childrenList}
+    ${noteHTML}
+    ${editButtons}
+  `;
+
+  panel.querySelectorAll('[data-jump]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const targetEl = canvas.querySelector(`.node[data-id="${el.dataset.jump}"]`);
+      if(targetEl){
+        targetEl.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+        canvas.querySelectorAll('.node.highlight').forEach(x=>x.classList.remove('highlight'));
