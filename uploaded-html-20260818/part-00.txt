@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>బండిగుప్తాపు వారి వంశవృక్షం</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3ECDA;
+    --paper-dark:#E8DBBE;
+    --paper-line:#D8C79E;
+    --ink:#2B2013;
+    --ink-soft:#5B4C36;
+    --maroon:#7A3B1E;
+    --maroon-dark:#5E2C15;
+    --purple:#5B2C6F;
+    --green:#1F7A4D;
+    --pink:#E29CBE;
+    --pink-line:#C46A93;
+    --blue:#7FC4E0;
+    --blue-line:#3C90B4;
+    --gold:#C9922E;
+    --placeholder-bg:#F4E4EC;
+    --shadow: 0 2px 6px rgba(43,32,19,0.18), 0 1px 2px rgba(43,32,19,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, #FAF5E7 0%, var(--paper) 45%, var(--paper-dark) 100%);
+    color:var(--ink);
+    font-family:'Inter', 'Noto Sans Telugu', sans-serif;
+    min-height:100vh;
+  }
+
+  .telugu{font-family:'Noto Sans Telugu','Inter',sans-serif;}
+
+  /* ---------- Header ---------- */
+  header{
+    padding:22px clamp(16px,4vw,48px) 16px;
+    border-bottom:3px solid var(--maroon);
+    background:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 60%);
+    position:relative;
+  }
+  .header-row{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .brand svg{flex:none;}
+  .brand h1{
+    font-family:'Noto Sans Telugu', serif;
+    font-weight:700;
+    font-size:clamp(22px,3.4vw,34px);
+    color:var(--maroon-dark);
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  .brand p{
+    margin:2px 0 0;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .meta{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:right;
+    line-height:1.5;
+    max-width:420px;
+  }
+  .meta b{color:var(--maroon-dark);}
+
+  /* ---------- Controls bar ---------- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    padding:14px clamp(16px,4vw,48px);
+    background:var(--paper-dark);
+    border-bottom:1px solid var(--paper-line);
+    position:sticky;
+    top:0;
+    z-index:20;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    flex:1;
+  }
+  .tab{
+    font-family:'Noto Sans Telugu', sans-serif;
+    font-size:13.5px;
+    padding:8px 14px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:#FBF7EC;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+  }
+  .tab:hover{border-color:var(--gold); color:var(--maroon-dark);}
+  .tab.active{
+    background:var(--maroon);
+    border-color:var(--maroon);
+    color:#fff;
+    box-shadow:var(--shadow);
+  }
+  .tab.disabled{opacity:0.45; cursor:not-allowed;}
+
+  .search-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  #search{
+    font-family:'Noto Sans Telugu', sans-serif;
+    font-size:13.5px;
+    padding:8px 12px 8px 32px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:#FBF7EC;
+    width:200px;
+    color:var(--ink);
+  }
+  #search:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .search-wrap svg{position:absolute; left:9px; opacity:0.5; pointer-events:none;}
+  #search-results{
+    position:absolute;
+    top:calc(100% + 4px);
+    left:0;
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    max-height:260px;
+    overflow-y:auto;
+    width:280px;
+    z-index:30;
+    display:none;
+  }
+  #search-results.show{display:block;}
+  .sr-item{
+    padding:8px 12px;
+    font-size:13px;
+    font-family:'Noto Sans Telugu',sans-serif;
+    cursor:pointer;
+    border-bottom:1px solid #f1ead6;
+  }
+  .sr-item:last-child{border-bottom:none;}
+  .sr-item:hover{background:var(--paper);}
+  .sr-branch{font-size:10.5px; color:var(--ink-soft); font-family:'Inter',sans-serif;}
+
+  .zoom-controls{display:flex; gap:4px;}
+  .icon-btn{
+    width:32px;height:32px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:#FBF7EC;
+    color:var(--ink-soft);
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:hover{border-color:var(--gold); color:var(--maroon-dark);}
+
+  /* Touch-friendly tap targets on phones/tablets */
+  @media (max-width:820px), (pointer:coarse){
+    .icon-btn{width:40px; height:40px; font-size:18px;}
+    .tab{padding:10px 14px; font-size:14px;}
+    .edit-btn{padding:10px 6px; font-size:12.5px;}
+    .ef-translit-btn{width:40px;}
+    #search{width:150px;}
+  }
+  @media (max-width:520px){
+    .header-row{flex-direction:column; align-items:flex-start; gap:6px;}
+    .meta{text-align:left; max-width:100%;}
+    .controls{gap:8px;}
+    #search{width:120px;}
+    .legend{max-width:170px; font-size:11px; padding:8px 10px;}
+  }
+
+  /* ---------- Layout ---------- */
+  .main{
+    display:flex;
+    height:calc(100vh - 132px);
+  }
+  @media (max-width:820px){
+    .main{flex-direction:column; height:auto;}
+  }
+
+  .canvas-wrap{
+    flex:1;
+    overflow:auto;
+    position:relative;
+    cursor:grab;
+    background-image: radial-gradient(circle, #d9c9a1 0.8px, transparent 0.8px);
+    background-size: 18px 18px;
+    background-color: var(--paper);
+  }
+  .canvas-wrap.dragging{cursor:grabbing;}
+  .canvas{
+    display:inline-block;
+    padding:60px 80px 100px;
+    transform-origin: top left;
+    transition: transform .12s ease-out;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend{
+    position:absolute;
+    bottom:14px;
+    left:14px;
+    background:rgba(251,247,236,0.95);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:10px 14px;
+    font-size:12px;
+    box-shadow:var(--shadow);
+    z-index:15;
+    max-width:230px;
+  }
+  .legend h4{margin:0 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--maroon-dark);}
+  .legend-row{display:flex; align-items:center; gap:8px; margin:4px 0; color:var(--ink-soft);}
+  .legend-line{width:22px; height:0; border-top:2px solid var(--green);}
+  .legend-line.h{border-top:none; border-left:2px solid var(--pink-line); height:14px; width:0; margin:0 10px;}
+  .legend-box{width:14px;height:14px;border-radius:3px; flex:none;}
+
+  /* ---------- Detail panel ---------- */
+  .panel{
+    width:300px;
+    flex:none;
+    background:#FBF7EC;
+    border-left:2px solid var(--paper-line);
+    padding:20px;
+    overflow-y:auto;
+  }
+  @media (max-width:820px){
+    .panel{width:auto; border-left:none; border-top:2px solid var(--paper-line);}
+  }
+  .panel-empty{
+    color:var(--ink-soft);
+    font-size:13.5px;
+    line-height:1.7;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    margin-top:40px;
+    text-align:center;
+  }
+  .panel h3{
+    font-family:'Noto Sans Telugu', sans-serif;
+    font-size:20px;
+    margin:0 0 2px;
+    color:var(--maroon-dark);
+  }
+  .panel .p-title{font-size:13px; color:var(--ink-soft); margin-bottom:14px; font-family:'Noto Sans Telugu',sans-serif;}
+  .panel .p-dates{
+    display:inline-block;
