@@ -1,1 +1,1433 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><title>Bandiguptapu Family</title><style>html,body{margin:0;background:#fff;color:#202833;font-family:system-ui,-apple-system,sans-serif;min-height:100%}.boot{min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px}.spinner{width:44px;height:44px;border:4px solid #e4e9ef;border-top-color:#b5852f;border-radius:50%;margin:0 auto 16px;animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}small{color:#5f6b78}</style></head><body><div class="boot"><div><div class="spinner"></div><h2>Loading Bandiguptapu Family Tree</h2><small>Building D3 genealogy visualization…</small></div></div><script>(async()=>{try{const names=Array.from({length:8},(_,i)=>`app-parts/part-${String(i).padStart(2,'0')}.txt?v=33`);const parts=[];for(const name of names){const r=await fetch(name,{cache:'no-store'});if(!r.ok)throw new Error(name+' '+r.status);parts.push(await r.text())}document.open();document.write(parts.join('')+'<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"><\/script><script src="family-patch.js?v=33"><\/script><script src="relationship-integrity.js?v=33"><\/script><script src="verified-pdf-connections.js?v=33"><\/script><script src="theme-modern.js?v=33"><\/script><script src="accessible-family-theme.js?v=33"><\/script><script src="generation-system.js?v=33"><\/script><script src="d3-family-tree.js?v=33"><\/script>');document.close()}catch(e){document.body.innerHTML='<div class="boot"><div><h2>Unable to load the family tree</h2><small>Deployment files are still syncing. Please refresh in a minute.</small></div></div>';console.error(e)}})();</script></body></html>
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>బండిగుప్తాపు వారి వంశవృక్షం</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3ECDA;
+    --paper-dark:#E8DBBE;
+    --paper-line:#D8C79E;
+    --ink:#2B2013;
+    --ink-soft:#5B4C36;
+    --maroon:#7A3B1E;
+    --maroon-dark:#5E2C15;
+    --purple:#5B2C6F;
+    --green:#1F7A4D;
+    --pink:#E29CBE;
+    --pink-line:#C46A93;
+    --blue:#7FC4E0;
+    --blue-line:#3C90B4;
+    --gold:#C9922E;
+    --placeholder-bg:#F4E4EC;
+    --shadow: 0 2px 6px rgba(43,32,19,0.18), 0 1px 2px rgba(43,32,19,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, #FAF5E7 0%, var(--paper) 45%, var(--paper-dark) 100%);
+    color:var(--ink);
+    font-family:'Inter', 'Noto Sans Telugu', sans-serif;
+    min-height:100vh;
+  }
+
+  .telugu{font-family:'Noto Sans Telugu','Inter',sans-serif;}
+
+  /* ---------- Header ---------- */
+  header{
+    padding:22px clamp(16px,4vw,48px) 16px;
+    border-bottom:3px solid var(--maroon);
+    background:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 60%);
+    position:relative;
+  }
+  .header-row{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .brand svg{flex:none;}
+  .brand h1{
+    font-family:'Noto Sans Telugu', serif;
+    font-weight:700;
+    font-size:clamp(22px,3.4vw,34px);
+    color:var(--maroon-dark);
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  .brand p{
+    margin:2px 0 0;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .meta{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:right;
+    line-height:1.5;
+    max-width:420px;
+  }
+  .meta b{color:var(--maroon-dark);}
+
+  /* ---------- Controls bar ---------- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    padding:14px clamp(16px,4vw,48px);
+    background:var(--paper-dark);
+    border-bottom:1px solid var(--paper-line);
+    position:sticky;
+    top:0;
+    z-index:20;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    flex:1;
+  }
+  .tab{
+    font-family:'Noto Sans Telugu', sans-serif;
+    font-size:13.5px;
+    padding:8px 14px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:#FBF7EC;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+  }
+  .tab:hover{border-color:var(--gold); color:var(--maroon-dark);}
+  .tab.active{
+    background:var(--maroon);
+    border-color:var(--maroon);
+    color:#fff;
+    box-shadow:var(--shadow);
+  }
+  .tab.disabled{opacity:0.45; cursor:not-allowed;}
+
+  .search-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  #search{
+    font-family:'Noto Sans Telugu', sans-serif;
+    font-size:13.5px;
+    padding:8px 12px 8px 32px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:#FBF7EC;
+    width:200px;
+    color:var(--ink);
+  }
+  #search:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .search-wrap svg{position:absolute; left:9px; opacity:0.5; pointer-events:none;}
+  #search-results{
+    position:absolute;
+    top:calc(100% + 4px);
+    left:0;
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    max-height:260px;
+    overflow-y:auto;
+    width:280px;
+    z-index:30;
+    display:none;
+  }
+  #search-results.show{display:block;}
+  .sr-item{
+    padding:8px 12px;
+    font-size:13px;
+    font-family:'Noto Sans Telugu',sans-serif;
+    cursor:pointer;
+    border-bottom:1px solid #f1ead6;
+  }
+  .sr-item:last-child{border-bottom:none;}
+  .sr-item:hover{background:var(--paper);}
+  .sr-branch{font-size:10.5px; color:var(--ink-soft); font-family:'Inter',sans-serif;}
+
+  .zoom-controls{display:flex; gap:4px;}
+  .icon-btn{
+    width:32px;height:32px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:#FBF7EC;
+    color:var(--ink-soft);
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:hover{border-color:var(--gold); color:var(--maroon-dark);}
+
+  /* Touch-friendly tap targets on phones/tablets */
+  @media (max-width:820px), (pointer:coarse){
+    .icon-btn{width:40px; height:40px; font-size:18px;}
+    .tab{padding:10px 14px; font-size:14px;}
+    .edit-btn{padding:10px 6px; font-size:12.5px;}
+    .ef-translit-btn{width:40px;}
+    #search{width:150px;}
+  }
+  @media (max-width:520px){
+    .header-row{flex-direction:column; align-items:flex-start; gap:6px;}
+    .meta{text-align:left; max-width:100%;}
+    .controls{gap:8px;}
+    #search{width:120px;}
+    .legend{max-width:170px; font-size:11px; padding:8px 10px;}
+  }
+
+  /* ---------- Layout ---------- */
+  .main{
+    display:flex;
+    height:calc(100vh - 132px);
+  }
+  @media (max-width:820px){
+    .main{flex-direction:column; height:auto;}
+  }
+
+  .canvas-wrap{
+    flex:1;
+    overflow:auto;
+    position:relative;
+    cursor:grab;
+    background-image: radial-gradient(circle, #d9c9a1 0.8px, transparent 0.8px);
+    background-size: 18px 18px;
+    background-color: var(--paper);
+  }
+  .canvas-wrap.dragging{cursor:grabbing;}
+  .canvas{
+    display:inline-block;
+    padding:60px 80px 100px;
+    transform-origin: top left;
+    transition: transform .12s ease-out;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend{
+    position:absolute;
+    bottom:14px;
+    left:14px;
+    background:rgba(251,247,236,0.95);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:10px 14px;
+    font-size:12px;
+    box-shadow:var(--shadow);
+    z-index:15;
+    max-width:230px;
+  }
+  .legend h4{margin:0 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--maroon-dark);}
+  .legend-row{display:flex; align-items:center; gap:8px; margin:4px 0; color:var(--ink-soft);}
+  .legend-line{width:22px; height:0; border-top:2px solid var(--green);}
+  .legend-line.h{border-top:none; border-left:2px solid var(--pink-line); height:14px; width:0; margin:0 10px;}
+  .legend-box{width:14px;height:14px;border-radius:3px; flex:none;}
+
+  /* ---------- Detail panel ---------- */
+  .panel{
+    width:300px;
+    flex:none;
+    background:#FBF7EC;
+    border-left:2px solid var(--paper-line);
+    padding:20px;
+    overflow-y:auto;
+  }
+  @media (max-width:820px){
+    .panel{width:auto; border-left:none; border-top:2px solid var(--paper-line);}
+  }
+  .panel-empty{
+    color:var(--ink-soft);
+    font-size:13.5px;
+    line-height:1.7;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    margin-top:40px;
+    text-align:center;
+  }
+  .panel h3{
+    font-family:'Noto Sans Telugu', sans-serif;
+    font-size:20px;
+    margin:0 0 2px;
+    color:var(--maroon-dark);
+  }
+  .panel .p-title{font-size:13px; color:var(--ink-soft); margin-bottom:14px; font-family:'Noto Sans Telugu',sans-serif;}
+  .panel .p-dates{
+    display:inline-block;
+    font-size:11.5px;
+    background:var(--paper-dark);
+    border-radius:5px;
+    padding:2px 8px;
+    margin-bottom:14px;
+    color:var(--ink-soft);
+  }
+  .p-section{margin-top:16px;}
+  .p-section h5{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:0.07em;
+    color:var(--gold); margin:0 0 6px; font-family:'Inter',sans-serif; font-weight:600;
+  }
+  .p-section p, .p-section li{font-size:13.5px; line-height:1.6; font-family:'Noto Sans Telugu',sans-serif; color:var(--ink);}
+  .p-section ul{margin:0; padding-left:18px;}
+  .p-note{
+    background:var(--paper);
+    border-left:3px solid var(--gold);
+    padding:8px 10px;
+    font-size:12.5px;
+    font-style:italic;
+    color:var(--ink-soft);
+    border-radius:0 6px 6px 0;
+  }
+  .pill-link{
+    display:inline-block;
+    font-size:12.5px;
+    background:var(--paper-dark);
+    padding:4px 10px;
+    border-radius:20px;
+    margin:3px 4px 0 0;
+    cursor:pointer;
+    font-family:'Noto Sans Telugu',sans-serif;
+    border:1px solid transparent;
+  }
+  .pill-link:hover{border-color:var(--gold); color:var(--maroon-dark);}
+
+  .p-edit-actions{border-top:1px dashed var(--paper-line); padding-top:14px; margin-top:18px;}
+  .edit-btn-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .edit-btn{
+    flex:1; min-width:78px;
+    font-family:'Noto Sans Telugu',sans-serif;
+    font-size:12px; font-weight:600;
+    background:var(--paper); border:1px solid var(--gold);
+    color:var(--maroon-dark);
+    border-radius:8px; padding:7px 6px;
+    cursor:pointer; line-height:1.4; text-align:center;
+  }
+  .edit-btn span{display:block; font-family:'Inter',sans-serif; font-weight:400; font-size:10px; opacity:0.7;}
+  .edit-btn:hover{background:var(--gold); color:#fff;}
+  .edit-form{
+    margin-top:10px; padding:12px;
+    background:#fff; border:1px solid var(--paper-line); border-radius:8px;
+  }
+  .ef-title{font-size:13px; font-weight:600; color:var(--maroon-dark); margin-bottom:8px;}
+  .ef-title span{font-family:'Inter',sans-serif; font-weight:400; font-size:11px; color:var(--ink-soft);}
+  .edit-form input{
+    width:100%; box-sizing:border-box;
+    font-family:'Noto Sans Telugu',sans-serif; font-size:13px;
+    padding:7px 9px; margin-bottom:7px;
+    border:1px solid var(--paper-line); border-radius:6px;
+    background:var(--paper);
+  }
+  .edit-form input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .ef-field-row{display:flex; gap:6px; align-items:stretch; margin-bottom:7px;}
+  .ef-field-row input{margin-bottom:0;}
+  .ef-translit-btn{
+    flex:none; width:34px;
+    background:var(--paper-dark); border:1px solid var(--paper-line); border-radius:6px;
+    cursor:pointer; font-size:14px;
+  }
+  .ef-translit-btn:hover{background:var(--gold);}
+  .ef-hint{font-size:10.5px; color:var(--ink-soft); font-style:italic; margin:-2px 0 8px;}
+  .ef-btn-row{display:flex; gap:8px; margin-top:2px;}
+  .ef-save, .ef-cancel{
+    flex:1; font-family:'Noto Sans Telugu',sans-serif; font-size:12.5px; font-weight:600;
+    padding:8px; border-radius:6px; cursor:pointer; border:1px solid transparent;
+  }
+  .ef-save{background:var(--green); color:#fff;}
+  .ef-save:hover{background:#166139;}
+  .ef-cancel{background:var(--paper-dark); color:var(--ink-soft); border-color:var(--paper-line);}
+  .ef-cancel:hover{color:var(--ink);}
+
+  .export-modal-overlay{
+    position:fixed; inset:0; background:rgba(43,32,19,0.55);
+    display:flex; align-items:center; justify-content:center; z-index:100;
+  }
+  .export-modal{
+    background:#FBF7EC; border-radius:12px; box-shadow:var(--shadow);
+    width:min(680px, 90vw); max-height:80vh; display:flex; flex-direction:column;
+    padding:20px;
+  }
+  .export-modal-header{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:16px; font-weight:700; color:var(--maroon-dark); margin-bottom:8px;
+  }
+  .export-modal-header button{background:none; border:none; font-size:16px; cursor:pointer; color:var(--ink-soft);}
+  .export-modal-note{font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; line-height:1.5;}
+  #export-textarea{
+    flex:1; min-height:280px; font-family:monospace; font-size:11.5px;
+    padding:10px; border:1px solid var(--paper-line); border-radius:8px;
+    background:#fff; resize:vertical;
+  }
+  .export-modal-actions{display:flex; gap:8px; margin-top:12px;}
+  .export-modal-actions button{
+    flex:1; font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+    padding:10px; border-radius:8px; cursor:pointer; border:1px solid var(--gold);
+    background:var(--paper); color:var(--maroon-dark);
+  }
+  .export-modal-actions button:hover{background:var(--gold); color:#fff;}
+
+  /* ---------- Tree (pure-CSS org chart) ---------- */
+  .tree, .tree ul{
+    padding-top:26px; position:relative;
+    display:flex; justify-content:center;
+    list-style:none; margin:0;
+  }
+  .tree{padding-top:0;}
+  .tree li{
+    display:flex; flex-direction:column; align-items:center;
+    list-style:none;
+    position:relative;
+    padding:26px 12px 0 12px;
+  }
+  .tree li::before, .tree li::after{
+    content:''; position:absolute; top:0; right:50%;
+    border-top:2px solid var(--green);
+    width:50%; height:26px;
+  }
+  .tree li::after{ right:auto; left:50%; border-left:2px solid var(--green); }
+  .tree li:only-child::after, .tree li:only-child::before{ display:none; }
+  .tree li:only-child{ padding-top:0; }
+  .tree li:first-child::before, .tree li:last-child::after{ border:0 none; }
+  .tree li:last-child::before{ border-right:2px solid var(--green); border-radius:0 6px 0 0; }
+  .tree li:first-child::after{ border-radius:6px 0 0 0; }
+  .tree ul::before{
+    content:''; position:absolute; top:0; left:50%;
+    border-left:2px solid var(--green); width:0; height:26px;
+  }
+  .tree > li{padding-top:0;}
+  .tree > li::before, .tree > li::after{display:none;}
+
+  .node-slot{
+    display:flex;
+    align-items:center;
+    gap:0;
+  }
+  .node{
+    font-family:'Noto Sans Telugu', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    background:var(--blue);
+    border:1px solid var(--blue-line);
+    color:#0d3446;
+    padding:8px 14px;
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    min-width:110px;
+    max-width:170px;
+    text-align:center;
+    line-height:1.3;
+    position:relative;
+    transition:transform .1s ease;
+  }
+  .node:hover{transform:translateY(-2px);}
+  .node.root{ background:var(--purple); border-color:#3d1c4d; color:#fff; font-size:14px; padding:10px 18px;}
+  .node.spouse{ background:var(--pink); border-color:var(--pink-line); color:#4a1030; }
+  .node.placeholder{
+    background:var(--placeholder-bg);
+    border:1.5px dashed var(--pink-line);
+    color:#9a6a80;
+    font-style:italic;
+    font-weight:400;
+    box-shadow:none;
+  }
+  .node .n-title{
+    display:block;
+    font-size:10px;
+    font-weight:400;
+    opacity:0.8;
+    margin-top:2px;
+  }
+  .node.highlight{
+    outline:3px solid var(--gold);
+    outline-offset:2px;
+    animation:pulse 1.4s ease 2;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:var(--shadow);}
+    50%{box-shadow:0 0 0 6px rgba(201,146,46,0.35);}
+  }
+  .spouse-link{
+    width:20px; height:0; border-top:2px solid var(--pink-line);
+    align-self:center;
+  }
+
+  .empty-branch{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:15px;
+    text-align:center;
+    padding:80px 20px;
+    max-width:420px;
+    margin:0 auto;
+    line-height:1.7;
+  }
+
+  footer{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    padding:14px;
+    border-top:1px solid var(--paper-line);
+    background:var(--paper-dark);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="19" stroke="#7A3B1E" stroke-width="1.5"/>
+        <path d="M20 8c-4 4-4 8 0 12 4-4 4-8 0-12z" fill="#C9922E"/>
+        <path d="M20 20v13M20 33c-4 0-6-2-6-2M20 33c4 0 6-2 6-2M14 26c2 2 3 2 6 2M26 26c-2 2-3 2-6 2" stroke="#1F7A4D" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1 class="telugu">బండిగుప్తాపు వారి వంశవృక్షం</h1>
+        <p>Bandigupatapu Family Tree — an interactive heritage register</p>
+      </div>
+    </div>
+    <div class="meta telugu">
+      <b>గోత్రం:</b> కాశిపాల శ్రీవత్స &nbsp;•&nbsp; <b>ఇలవేల్పు:</b> మసేనమ్మ అమ్మవారు<br>
+      <b>మూలస్థానం:</b> రాయగూడెం, దుమ్ముగూడెం పోస్టు, భద్రాచలం తాలూకా
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="tabs" id="tabs"></div>
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input type="text" id="search" placeholder="పేరు వెతకండి... (search name)" autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+  <div class="zoom-controls">
+    <button class="icon-btn" id="zoom-out" title="Zoom out">−</button>
+    <button class="icon-btn" id="zoom-reset" title="Reset zoom">⤢</button>
+    <button class="icon-btn" id="zoom-in" title="Zoom in">+</button>
+    <button class="icon-btn" id="print-btn" title="Export / Print">⎙</button>
+    <button class="icon-btn" id="export-data-btn" title="Export edited data as code">{ }</button>
+  </div>
+</div>
+
+<div id="export-modal" class="export-modal-overlay" style="display:none;">
+  <div class="export-modal">
+    <div class="export-modal-header">
+      <span class="telugu">డేటా ఎగుమతి · Export Data</span>
+      <button id="export-modal-close">✕</button>
+    </div>
+    <p class="export-modal-note">Copy this and send it back so all your edits get saved permanently into the file. This covers every branch, including anything you've added via the + buttons.</p>
+    <textarea id="export-textarea" readonly></textarea>
+    <div class="export-modal-actions">
+      <button id="export-copy-btn">📋 Copy to clipboard</button>
+      <button id="export-download-btn">⬇ Download as .txt</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="canvas-wrap" id="canvas-wrap">
+    <div class="canvas" id="canvas"></div>
+    <div class="legend">
+      <h4>Legend / గుర్తులు</h4>
+      <div class="legend-row"><span class="legend-line"></span> Parent → Child (తండ్రి–కుమారుడు)</div>
+      <div class="legend-row"><span class="legend-line h"></span> Spouses (భార్యాభర్తలు)</div>
+      <div class="legend-row"><span class="legend-box" style="background:var(--purple)"></span> Branch ancestor (మూలపురుషుడు)</div>
+      <div class="legend-row"><span class="legend-box" style="background:var(--blue); border:1px solid var(--blue-line)"></span> Descendant</div>
+      <div class="legend-row"><span class="legend-box" style="background:var(--placeholder-bg); border:1.5px dashed var(--pink-line)"></span> Unnamed in source (పేరు లేదు)</div>
+    </div>
+  </div>
+  <div class="panel" id="panel">
+    <div class="panel-empty">Click any name in the tree<br>to see their details here.<br><br>ఏదైనా పేరుపై నొక్కండి.</div>
+  </div>
+</div>
+
+<footer>
+  Transcribed from the original Telugu chart · rooted at వెంక్ట్రాయుడు → రామప్ప · 3 of his sons' lines transcribed so far · more being added as transcription continues
+</footer>
+
+<script>
+/* ---------------- DATA ---------------- */
+// Each node: {id, name, title, dates, note, spouse:{name,title}, children:[...], placeholder:bool}
+let uid = 0;
+function n(name, opts={}){
+  return Object.assign({id:'p'+(uid++), name, title:'', dates:'', note:'', spouse:null, children:[], placeholder:false}, opts);
+}
+
+const branch1 = n('పద్దప్ప', {title:'దండుకి సేనాధిపతి', children:[
+  n('రామప్ప', {title:'కోటకు సేనాధిపతి', children:[
+    n('వెంకప్ప', {title:'డాలు విద్యకు మొనగాడు'}),
+    n('పేరప్ప', {title:'అలుగు విద్యకు వస్తాడు'})
+  ]}),
+  n('రాజప్ప', {title:'ముల్లయుద్ధమునకు వస్తాడు', children:[
+    n('వెంకప్ప', {title:'గుర్రపుస్వారీకి వస్తాడు', note:'ఇతని వద్ద పిల్లలు లేరు (leaf) — దగ్గరలోని రెడ్డప్ప (Branch 2) సబ్‌ట్రీతో పొరపాటున కలిపేయబడింది, ఇప్పుడు సరిచేయబడింది.'}),
+    n('దేవప్ప', {title:'కత్తిసాముకు వస్తాడు'}),
+    n('సుబ్బప్ప', {title:'బల్లెము పోటుకు వస్తాడు'})
+  ]})
+]});
+
+const branch2 = n('నరసప్ప', {title:'అలుగువిద్యకు వస్తాడు', children:[
+  n('రెడ్డప్ప', {title:'దండుకి సేనానాయకుడు', children:[
+    n('వెంక్ట్రాయుడు', {title:'ముల్లయుద్ధమునకు వస్తాడు', children:[
+      n('నరసప్ప', {note:'పెండ్లి కాలేదు (unmarried)'})
+    ]}),
+    n('నాగప్ప', {title:'డాలు విద్యకు వస్తాడు', children:[
+      n('వెంకప్ప', {title:'రాజగారివద్ద నైనాయితి'})
+    ]})
+  ]}),
+  n('పీరప్ప', {title:'బోంఢ కొరతలు వేయుటకు వస్తాడు', children:[
+    n('పరమేశ్', {title:'వ్యవసాయం చేయుటకు నేర్పరి'}),
+    n('పద్దప్ప', {title:'రాజగారివద్ద ఐనాయితి'}),
+    n('వెంకటేశ్', {title:'పత్రందార్', children:[
+      n('పద్దయ్య', {note:'వీరు పెద్దాపురం నుండి బయలుదేరి రాజానగరం మీదుగా నరేంద్రపురం వెళ్ళారు'}),
+      n('నరసయ్య', {note:'వీరు పెద్దాపురం నుండి బయలుదేరి రాజానగరం మీదుగా నరేంద్రపురం వెళ్ళారు'})
+    ]})
+  ]}),
+  n('అచ్చప్ప', {title:'తప్పులు చేసినవారిని శిక్షించువారు', children:[
+    n('రామప్ప', {title:'నల్లమిల్లి మురాకు దానేదారు', children:[
+      n('పరమేశు', {children:[
+        n('పెద్దయ్య', {children:[
+          n('రామయ్య', {children:[
+            n('వెంకయ్య', {children:[
+              n('దేవయ్య', {note:'వీరు నరసాపురం వెళ్ళినారు'}),
+              n('లచ్చయ్య', {note:'వీరు నరసాపురం వెళ్ళినారు'}),
+              n('వెంకటరెడ్డి', {note:'వీరు నరసాపురం వెళ్ళినారు'})
+            ]}),
+            n('రెడ్డి', {children:[
+              n('రామయ్య', {note:'వీరు ఏనుగుపల్లిలో ఉన్నారు'})
+            ]})
+          ]})
+        ]})
+      ]})
+    ]}),
+    n('నరసప్ప', {title:'దేవగుప్తం కోటకు సేనాధిపతి', children:[
+      n('పద్దయ్య', {children:[
+        n('పుల్లయ్య', {note:'ఇక్కడి నుండి ద్విరేఖ (double-line) బస్ కనెక్టర్ ద్వారా ధృవీకరించబడింది — verified via the same long double-line bus connector traced back from this exact point.', children:[
+          n('పెద వెంకటరత్నం', {children:[
+            n('పుల్లయ్య', {title:'అదవాల నీతిమపాలికి', children:[
+              n('చిన రామారావు', {spouse:{name:'రత్నం'}, children:[
+                n('దేవి'), n('శ్రీను', {note:'లేదు'}), n('బేటి'), n('శివ')
+              ]})
+            ]}),
+            n('సుబ్బరాజ', {spouse:{name:'అడబాల సీతామహాలక్ష్మి'}, children:[
+              n('లాల్‌సాహెబ్', {spouse:{name:'అబ్బారెడ్డి రాజేశ్వరి'}, children:[
+                n('పెద్దింటు', {spouse:{name:'బసవా వెంకటరమణ'}}),
+                n('శ్రీ వెంకటకృష్ణ', {spouse:{name:'కల్వకొలను తరుణ సుభాషిణి'}})
+              ]}),
+              n('సత్యనారాయణమూర్తి', {spouse:{name:'దాసం రామానందం'}, children:[
+                n('దుర్గ', {spouse:{name:'దాసం వెంకటరత్నం'}}),
+                n('శ్రీను', {spouse:{name:'రాగిరెడ్డి నాగవెంకటజ్యోతి'}}),
+                n('సీత', {spouse:{name:'ర్యావి శ్రీనివాసరావు'}}),
+                n('శ్రీరామచంద్రమూర్తి', {note:'లేదు'})
+              ]}),
+              n('వెంకటరత్నం', {spouse:{name:'కైరం మాణిక్యం'}, children:[
+                n('వెంకటలక్ష్మి', {spouse:{name:'కైరం అదినారాయణ'}}),
+                n('సుబ్బరాజ', {spouse:{name:'రాగిరెడ్డి నాగవెంకటజ్యోతి'}}),
+                n('సత్యనారాయణమూర్తి', {spouse:{name:'కగుత్తాల సూర్య మహాలక్ష్మి'}})
+              ]}),
+              n('రామారావు', {spouse:{name:'కంకిపాటి మంగాతయారు'}, children:[
+                n('శ్రీను', {spouse:{name:'గురుమొగుల లక్ష్మి'}}),
+                n('సీత', {spouse:{name:'అడబాల వెంకటేశ్వరరావు'}}),
+                n('నారాయణరావు', {spouse:{name:'గండోతు శ్రీదేవి'}})
+              ]}),
+              n('సూర్యనారాయణమూర్తి', {spouse:{name:'వీరాబత్తుల కన్నాంబ'}, children:[
+                n('వీరవెంకటేశ్వరరావు', {spouse:{name:'రంకిరెడ్డి బినావరి'}}),
+                n('సుబ్బరాజ', {spouse:{name:'ఐనాడి పుస్తా'}})
+              ]}),
+              n('నాగేశ్వరరావు', {spouse:{name:'రంకిరెడ్డి వరలక్ష్మి'}, children:[
+                n('సుబ్బరాజు', {spouse:{name:'పెన్నాడి పూర్ణ'}}),
+                n('సూర్యనారాయణ', {spouse:{name:'రంకిరెడ్డి చిన్నారి'}}),
+                n('వీరపండు'), n('శివన్నారాయణ'), n('గణేష్')
+              ]}),
+              n('అక్కమ్మ', {spouse:{name:'ఏపుగంటి నారాయణరావు'}}),
+              n('రాధాక్రుష్ట', {spouse:{name:'మామిడిపల్లి కనకరత్న'}}),
+              n('వెంకటేశ్వరరావు', {spouse:{name:'మామిడిపల్లి కనకరత్న'}}),
+              n('పాండురంగారావు', {spouse:{name:'సూరిశెట్టి పిన్న'}, children:[
+                n('దుర్గా శిరీష'), n('శ్రీ జ్ఞానసుధ')
+              ]})
+            ]}),
+            n('వెంకటస్వామి'),
+            n('రామయ్య'),
+            n('నారాయణమూర్తి', {children:[
+              n('పట్టాభిరామయ్య'),
+              n('నాగేశ్వరరావు'),
+              n('శ్రీనివాస్', {spouse:{name:'వెంకటలక్ష్మి'}, children:[
+                n('నాని'), n('సత్య'), n('సునీత')
+              ]}),
+              n('సూర్యచంద్రరావు', {spouse:{name:'ఇలపకుర్తి దుర్గాదేవి'}, children:[
+                n('నాగకార్తీక్'), n('జ్ఞానదీప్తి')
+              ]})
+            ]})
+          ]}),
+          n('బులి వెంకన్న', {children:[
+            n('సూరన్న', {children:[
+              n('నాగేశ్వరరావు', {spouse:{name:'ఇంటి గంగాభవాని'}, children:[
+                n('రామసత్య సూరిబాబు', {spouse:{name:'కరాటపు రామలక్ష్మి'}})
+              ]}),
+              n('బులి వెంకన్న', {title:'తాతారావు', note:'పాలకొల్లులో ఉన్నారు'})
+            ]}),
+            n('వెంకటస్వామి', {children:[
+              n('సత్యనారాయణ', {note:'పిల్లలు లేరు'}),
+              n('సుబ్బారావు', {note:'ఆడపిల్లలు కలరు'}),
+              n('వీరవెంకట సూర్యనారాయణ', {title:'ఎస్.బి.ఐ.', spouse:{name:'అద్దగడ్డ రాజేశ్వరి'}, children:[
+                n('లత ముత్య దుర్గాభవాని', {spouse:{name:'కైరం సుబ్రహ్మణ్యం'}}),
+                n('రుక్మిణి', {spouse:{name:'దాట్ల వెంకటరెడ్డినాయుడు'}}),
+                n('లక్ష్మీ నాగజ్యోతి')
+              ]})
+            ]}),
+            n('పుల్లయ్య', {note:'వీరికి పిల్లలు లేరు'})
+          ]}),
+          n('చిట్టి వెంకన్న', {spouse:{name:'మెరికెల వెంకట సుబ్బమ్మ'}, children:[
+            n('పుల్లయ్య', {spouse:{name:'మెరికెల సూర్యాకాంతం'}, children:[
+              n('సత్యనారాయణమూర్తి', {spouse:{name:'దాసం సూర్యావతి'}, children:[
+                n('పాండురంగ', {dates:'22-8-1966', title:'వ్యాపారవేత్త', spouse:{name:'వెంకటసుధారాణి'}, children:[
+                  n('', {placeholder:true}), n('', {placeholder:true})
+                ]}),
+                n('నాగ భవాని', {spouse:{name:'మారెళ్ళ వీరవెంకటసత్యనారాయణ'}}),
+                n('సక్కుబాయి', {spouse:{name:'గుమ్మళ్ళ శ్రీనివాస్'}})
+              ]}),
+              n('వీరవెంకట సూర్యనారాయణమూర్తి', {spouse:{name:'కంకిపాటి ఆదిలక్ష్మి'}})
+            ]}),
+            n('శేషమ్మ', {spouse:{name:'కామిరెడ్డి సూరన్న'}}),
+            n('నాగరత్నం', {spouse:{name:'దాసం రామమూర్తి', title:'టీచర్'}}),
+            n('వెంకట సుబ్బారావు', {title:'టీచర్', dates:'1929–2000', spouse:{name:'మోటుపల్లి సుందరమాణిక్యం'}, children:[
+              n('వీరవెంకట సత్యనారాయణ', {title:'సత్తిబాబు', dates:'8-8-1966', spouse:{name:'కంకిపాటి నాగసత్యమణి'}, children:[
+                n('వెంకట శివసుభాష్', {title:'M.B.A.', dates:'13-12-1986', spouse:{name:'గుమ్మళ్ళ జ్ఞానశ్రీ వీణాదుర్గ పద్మజ్యోతి'}}),
+                n('సత్య సుందరకుమార్', {title:'M.S. (U.S.A.)', dates:'3-12-1991'})
+              ]}),
+              n('నాగేశ్వరరావు', {title:'లెక్చరర్', dates:'17-11-1951', spouse:{name:'మెరికల శేషరత్నం'}, children:[
+                n('వెంకటలక్ష్మి', {spouse:{name:'ఆచంట వెంకటేశ్వరరావు'}, children:[
+                  n('వెంకటలక్ష్మి', {spouse:{name:'కంకిపాటి శ్రీనివాసరావు'}}),
+                  n('సూర్యకుమారి', {spouse:{name:'వలవల గీతాపల్వధర్'}})
+                ]}),
+                n('సత్యసుందరి', {spouse:{name:'అడబాల వెంకటసత్యనారాయణ'}}),
+                n('వెంకటరత్నకుమారి', {spouse:{name:'కంకిపాటి నారాయణమూర్తి'}}),
+                n('గంగాభవానిశంకర్', {spouse:{name:'అబ్బిరెడ్డి రంగబాబు'}})
+              ]})
+            ]}),
+            n('సూర్యనారాయణ', {spouse:{name:'సుంకర సత్యవతి'}, children:[
+              n('వెంకట సత్యనారాయణ', {spouse:{name:'వేగి నాగవేణి'}, children:[
+                n('సత్యవతి', {spouse:{name:'కంకిపాటి వీరబాబు'}}),
+                n('సూర్యనారాయణ', {spouse:{name:'ముత్యాల సాయినాగ మల్లేశ్వరి'}})
+              ]}),
+              n('నారాయణమ్మ', {spouse:{name:'కంకిపాటి వీరభద్రరావు'}}),
+              n('వెంకటేశ్వరరావు', {title:'చిట్టి వెంకన్న', spouse:{name:'మెరికెల సీతారామలక్ష్మి'}, children:[
+                n('సత్యవతి', {spouse:{name:'కంకిపాటి నారాయణమూర్తి'}}),
+                n('సూర్యనారాయణ', {spouse:{name:'శిరిగినిడి పావని'}})
+              ]}),
+              n('వెంకటేశ్వరరావు', {title:'రెడ్డమ్మ', spouse:{name:'కంకిపాటి వెంకటరమణ'}, children:[
+                n('సత్యవాణి', {spouse:{name:'వంగా రవిప్రసాద్'}}),
+                n('సూర్యకుమారి')
+              ]})
+            ]}),
+            n('చంద్రకాంతం', {spouse:{name:'సుంకర సత్యం'}}),
+          ]}),
+          n('సుబ్బయ్య', {children:[
+            n('సూర్యనారాయణమూర్తి', {title:'టీచర్', children:[
+              n('వరప్రసాద్'),
+              n('బాలసుబ్రహ్మణ్యం', {children:[
+                n('సురేష్‌బాబు')
+              ]}),
+              n('రామచంద్రరావు', {children:[
+                n('వెంకటరత్నం')
+              ]})
+            ]}),
+            n('చంద్రరావు', {children:[
+              n('వెంకటరత్నం', {children:[
+                n('చంద్రశేఖర్'), n('వెంకటరామకృష్ణ')
+              ]})
+            ]}),
+            n('పుల్లయ్య'),
+            n('వెంకటరత్నం'),
+            n('సత్యనారాయణమూర్తి', {children:[
+              n('నీలభద్రరాజు', {children:[
+                n('', {placeholder:true, note:'ఒక కుమారుడు ఉన్నారని తెలిసింది, పేరు సరిగ్గా డీకోడ్ చేయలేకపోయాను — one son confirmed but name could not be reliably decoded from the garbled text fragment given.'})
+              ]}),
+              n('నాగు'), n('ప్రసాద్')
+            ]}),
+            n('నాగేశ్వరరావు', {children:[
+              n('జయరాజ్'), n('దేవరాజ్'), n('శ్రీనివాసు')
+            ]})
+          ]}),
+        ]}),
+        n('సుబ్బయ్య', {children:[
+          n('వెంకయ్య'), n('పెద్దయ్య')
+        ]}),
+        n('రామయ్య', {children:[
+          n('చిన వెంకటరత్నం', {children:[
+            n('రామయ్య', {title:'టీచర్', children:[
+              n('వీరవెంకటసత్యనారాయణ', {title:'ఎఫ్.సి.ఐ.', children:[
+                n('దుర్గా', {spouse:{name:'శ్రీనివాసరావు'}}),
+                n('నాగీర సత్యనారాయణమూర్తి'),
+                n('సీతామహాలక్ష్మి', {spouse:{name:'నిమ్మకాయల శ్రీనివాసరావు'}}),
+                n('దుర్గాభవాని', {spouse:{name:'సుంకర వెంకటేష్'}})
+              ]}),
+              n('సూర్యనారాయణరావు')
+            ]}),
+            n('సత్యనారాయణ', {children:[
+              n('మల్లేశ్వరరావు'),
+              n('పట్టాభిరామారావు', {spouse:{name:'బండి సత్యవతి'}, children:[
+                n('వీరవెంకట సత్యనారాయణ మూర్తి', {spouse:{name:'లక్ష్మీదుర్గాభవాని'}, children:[
+                  n('', {placeholder:true}), n('', {placeholder:true})
+                ]})
+              ]}),
+              n('సత్య మణి', {spouse:{name:'ఏడిద త్రిమూర్తులు'}}),
+              n('సాయమ్మ', {spouse:{name:'సూరిశెట్టి సుబ్రహ్మణ్యం'}}),
+              n('సూర్యకుమారి', {spouse:{name:'ఏడిద సత్యనారాయణ'}}),
+              n('ఏడుకొండల వెంకటలక్ష్మణరావు', {spouse:{name:'ఏడిద నాగసద్దావతి'}}),
+              n('నాగేశ్వరరావు', {spouse:{name:'ఏడిద కృష్ణవేణి'}, children:[
+                n('హేమంత్'), n('సుమంత్')
+              ]}),
+              n('మురళీక్రిష్ణ', {spouse:{name:'సూరిశెట్టి సత్యవేణి'}, children:[
+                n('సూర్య శ్రావణి'), n('సాయి శరణ్య')
+              ]})
+            ]}),
+            n('అయ్యప్పారావు', {children:[
+              n('వెంకటరత్నం', {children:[
+                n('సుబ్రహ్మణ్యం'), n('లక్ష్మణరావు')
+              ]}),
+              n('ఆదినారాయణ', {children:[
+                n('శ్రీనివాసరావు')
+              ]}),
+              n('నరసింహరావు', {children:[
+                n('మల్లేశ్వరరావు')
+              ]}),
+              n('సత్యనారాయణ', {children:[
+                n('ప్రసాద్')
+              ]}),
+              n('రామ్మోహనరావు', {children:[
+                n('శివకుమార్', {dates:'25-3-93'}),
+                n('సురేష్‌కుమార్', {dates:'28-1-95'})
+              ]})
+            ]}),
+          ]})
+        ]})
+      ]}),
+      n('వెంకటేశు', {children:[
+        n('సుబ్బయ్య', {children:[
+          n('తాతయ్య', {children:[
+            n('సుబ్బారావు', {title:'హోటల్', spouse:{name:'పల్లాలమ్మ'}, note:'వీరు అమలాపురంలో స్థిరపడినారు', children:[
+              n('వెంకటలక్ష్మి', {spouse:{name:'సలాది విజయ పల్లరాజు'}}),
+              n('తాతాజీ', {spouse:{name:'అన్యం పద్మావతి'}, children:[
+                n('జ్ఞానప్రసన్న రాజేశ్వరి'), n('శ్రీనివాస సుభాష్')
+              ]}),
+              n('బేబి', {spouse:{name:'దాగ్లంక యేసుబాబు'}}),
+              n('సునీత', {spouse:{name:'నూకల సూర్యారావు'}})
+            ]})
+          ]})
+        ]})
+      ]}),
+      n('అచ్చయ్య', {children:[
+        n('సుబ్బయ్య', {children:[
+          n('స్వామి', {children:[
+            n('వెంకటరత్నం', {title:'టీచర్'}),
+            n('సూర్యారావు')
+          ]})
+        ]})
+      ]})
+    ]})
+  ]}),
+  n('వెంకప్ప', {title:'రాయబారములకు వస్తాడు', children:[
+    n('రామప్ప', {title:'గుర్రపు స్వారీకి వస్తాడు', children:[
+      n('వెంకయ్య', {note:'వీరు పెద్దాపురం నుండి బయలుదేరినారు'}),
+      n('సుబ్బయ్య', {note:'వీరు పెద్దాపురం నుండి బయలుదేరినారు'}),
+      n('రామస్వామి', {note:'వీరు పెద్దాపురం నుండి బయలుదేరినారు'}),
+      n('తమ్మయ్య', {note:'వీరు పెద్దాపురం నుండి బయలుదేరినారు'})
+    ]}),
+    n('నరసప్ప', {title:'డాలు కత్తికి వస్తాడు', children:[
+      n('పెద వెంకయ్య'), n('రామస్వామి'), n('వెంకయ్య'),
+      n('చినరామస్వామి'), n('తమ్మయ్య'), n('అచ్చయ్య')
+    ]}),
+    n('నాగప్ప', {title:'అలుగు విద్యకు వస్తాడు', children:[
+        n('అచ్యుతరాయుడు', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('సుబ్బయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('వెంకట్రాయుడు', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('తమ్మయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('వెంకటరెడ్డి', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('పేరయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('వెంకటరత్నం', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('చిన వెంకటరత్నం', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'}),
+        n('గంగయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి తాడిమళ్ళ మాధవవరంలో స్థిరపడినారు'})
+    ]})
+  ]})
+]});
+
+const branch3 = n('వెంకప్ప', {title:'గ్రధ్రుప్యాలికి పట్టాదు', children:[
+  n('పద్దప్ప', {title:'నరసింగం పిల్లలో నేర్పు', children:[
+    n('వీర్భద్రప్ప', {children:[
+      n('రాజప్ప', {children:[
+        n('అచ్యుతరాయుడు', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('సుబ్బయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('వెంకటాయుడు', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('తమ్మయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('వెంకటరెడ్డి', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('వీరయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('వెంకటరత్నం', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('చిన వెంకటరత్నం', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'}),
+        n('గంగయ్య', {note:'ఈ తొమ్మండుగురు పెద్దాపురం నుండి బయలుదేరి ఆదిమయ్య మఖపవరంలో స్థిరపడిరి'})
+      ]})
+    ]})
+  ]}),
+  n('నరసప్ప', {title:'శక్తిమంతుడని మెచ్చిన'}),
+  n('సుబ్బప్ప', {title:'శనాతాన్య మార్గదర్శకుడు'}),
+  n('వీరప్ప'),
+  n('దాన్యజ…', {placeholder:true, note:'మూలంలో అస్పష్టం'}),
+  n('తిమ్మప్ప', {title:'శక్తిమంతుడు'}),
+  n('రెడ్డప్ప', {title:'పోలిసిపాలికిన వేయుటకు'}),
+  n('పెద్దప్ప', {title:'అలుగు విద్యకు పట్టాదు'})
+]});
+
+// Son 3 of రామప్ప — a major branch missed on the first pass, found by tracing the
+// full-width spine again. Confirmed to 2-3 generations; some deeper nodes under
+// దేవప్ప's line recur with names identical to nodes elsewhere in the chart
+// (వెంకప్ప, రాజప్ప, రామప్ప reused constantly across branches at different
+// generations), so that sub-line is flagged uncertain rather than guessed.
+const branch4 = n('వెంకప్ప', {title:'గుర్రపుస్వారీకి వస్తాడు', children:[
+  n('పద్దప్ప', {title:'సిరంగి పేల్చుటలో నేర్పరి', children:[
+    n('పెద్దప్ప', {title:'గుర్రపు స్వారీకి వస్తాడు', children:[
+      n('రాజప్ప', {title:'డాలు విద్యకు మొనగాడు'}),
+      n('సింహాద్రప్ప', {title:'అలుగు విద్యకు వస్తాడు', note:'ఈ అయిదుగురు పెద్దాపురం మహారాజు గారివద్ద సర్దార్లుగా ఉన్నారు'}),
+      n('జగతప్ప', {title:'జాధారములు నడిపించుటకు నేర్పరి', note:'ఈ అయిదుగురు పెద్దాపురం మహారాజు గారివద్ద సర్దార్లుగా ఉన్నారు'}),
+      n('సత్తప్ప', {title:'తగవులు తీర్చుటకు నేర్పరి', note:'ఈ అయిదుగురు పెద్దాపురం మహారాజు గారివద్ద సర్దార్లుగా ఉన్నారు'}),
+      n('రామప్ప', {title:'కోటకు సేనాధిపతి', note:'ఈ అయిదుగురు పెద్దాపురం మహారాజు గారివద్ద సర్దార్లుగా ఉన్నారు'})
+    ]})
+  ]}),
+  n('నరసప్ప', {title:'కత్తిసామునకు మొనగాడు', children:[
+    n('వెంకప్ప', {title:'కోటకు సేనాధిపతి', note:'వీరిరువురు పెద్దాపురం నుండి బయలుదేరి నూజవీడు కోటకు వెళ్ళినారు'}),
+    n('రామప్ప', {title:'అలుగు విద్యకు వస్తాడు', note:'వీరిరువురు పెద్దాపురం నుండి బయలుదేరి నూజవీడు కోటకు వెళ్ళినారు'})
+  ]}),
+  n('సుబ్బప్ప', {title:'కళానాతాత్మ్య వెలిగించుటకు వస్తాడు', children:[
+    n('రాజప్ప', {title:'గుర్రపు స్వారీకి వస్తాడు', note:'వీరు పెద్దాపురం నుండి బయలుదేరి రాజమొమ్మంగి వెళ్ళినారు'}),
+    n('నాగప్ప', {title:'డాలు విద్యకు వస్తాడు', note:'వీరు పెద్దాపురం నుండి బయలుదేరి రాజమొమ్మంగి వెళ్ళినారు'}),
+    n('తిమ్మప్ప', {title:'కత్తిసాముకు మొనగాడు', note:'వీరు పెద్దాపురం నుండి బయలుదేరి రాజమొమ్మంగి వెళ్ళినారు'})
+  ]}),
+  n('దేవప్ప', {title:'కప్పముల వసూలుచేయుటకు నేర్పరి', children:[
+    n('వెంకప్ప', {title:'కుస్తీకి వస్తాడు'}),
+    n('రాజప్ప', {title:'దండుకు సేనాధిపతి'})
+  ]}),
+  n('నాగప్ప', {title:'దేవస్థాన ఉత్సవముల చేయుటకు నేర్పరి'}),
+  n('తిమ్మప్ప', {title:'దండు సేనలు నడిపించుటకు వస్తాడు'}),
+  n('రెడ్డప్ప', {title:'బోండకొరతలు వేయుటకు వస్తాడు'}),
+  n('పెద్దప్ప', {title:'అలుగు విద్యకు వస్తాడు'})
+]});
+
+// TRUE apex of the whole chart: వెంక్ట్రాయుడు -> రామప్ప -> (పద్దప్ప, నరసప్ప, వెంకప్ప, ...)
+// Confirmed directly from the source scan: a single horizontal spine runs from
+// రామప్ప (son of వెంక్ట్రాయుడు) across the full width of the page, and పద్దప్ప,
+// నరసప్ప, and వెంకప్ప (గ్రధ్రుప్యాలికి) all hang off that same spine as siblings.
+const trueRoot = n('వెంక్ట్రాయుడు', {title:'డాలుకత్తికి వస్తాడు', children:[
+  n('రామప్ప', {title:'కుస్తీకి వస్తాడు', note:'ఈ ముగ్గురు కుమారుల స్థానం spine ద్వారా నిర్ధారించబడింది. "వెంకప్ప (గ్రధ్రుప్యాలికి)" శాఖ స్థానం ఇంకా నిర్ధారణ కాలేదు కాబట్టి ఇక్కడ చేర్చలేదు — a 4th possible branch (వెంకప్ప గ్రధ్రుప్యాలికి) exists in the source but its exact attachment point is unconfirmed, so it is kept as a separate flagged tab rather than merged here.', children:[
+    branch1, branch2, branch4
+  ]})
+]});
+
+const branches = {
+  full:{label:'★ పూర్తి వృక్షం · Full tree (వెంక్ట్రాయుడు నుండి)', root:trueRoot, enabled:true},
+  b1:{label:'1. పద్దప్ప కుటుంబం', root:branch1, enabled:true},
+  b2:{label:'2. నరసప్ప కుటుంబం', root:branch2, enabled:true},
+  b4:{label:'3. వెంకప్ప (గుర్రపుస్వారీకి) కుటుంబం', root:branch4, enabled:true},
+  b3:{label:'⚠ వెంకప్ప (గ్రధ్రుప్యాలికి) — స్థానం అనిశ్చితం', root:branch3, enabled:true},
+  b5:{label:'మిగిలిన శాఖలు', root:null, enabled:false},
+};
+
+/* ---------------- INDEX (for search & parent lookups) ---------------- */
+const index = {}; // id -> {node, parent, branchKey}
+function buildIndex(node, parent, branchKey){
+  index[node.id] = {node, parent, branchKey};
+  (node.children||[]).forEach(c => buildIndex(c, node, branchKey));
+}
+Object.entries(branches).forEach(([key,b])=>{ if(b.root) buildIndex(b.root, null, key); });
+function reindexActive(){
+  for(const k in index) delete index[k];
+  const b = branches[activeBranch];
+  if(b.root) buildIndex(b.root, null, activeBranch);
+}
+
+/* ---------------- RENDER TABS ---------------- */
+const tabsEl = document.getElementById('tabs');
+let activeBranch = 'full';
+Object.entries(branches).forEach(([key,b])=>{
+  const t = document.createElement('div');
+  t.className = 'tab telugu' + (key===activeBranch?' active':'') + (!b.enabled?' disabled':'');
+  t.textContent = b.label;
+  t.title = b.enabled ? '' : 'ఇంకా transcribe చేయలేదు — not yet transcribed';
+  if(b.enabled){
+    t.addEventListener('click', ()=>{ activeBranch = key; renderAll(); });
+  }
+  tabsEl.appendChild(t);
+});
+
+/* ---------------- RENDER TREE ---------------- */
+const canvas = document.getElementById('canvas');
+
+function nodeBoxHTML(node, isRoot){
+  const classes = ['node'];
+  if(isRoot) classes.push('root');
+  if(node.placeholder) classes.push('placeholder');
+  const titleHTML = node.title ? `<span class="n-title telugu">${node.title}</span>` : (node.dates ? `<span class="n-title">${node.dates}</span>` : '');
+  return `<div class="${classes.join(' ')} telugu" data-id="${node.id}">${node.name}${titleHTML}</div>`;
+}
+
+function renderNode(node, isRoot=false){
+  let slot = `<div class="node-slot">${nodeBoxHTML(node, isRoot)}`;
+  if(node.spouse){
+    slot += `<span class="spouse-link"></span><div class="node spouse telugu" data-id="${node.id}-spouse">${node.spouse.name}${node.spouse.title?`<span class="n-title telugu">${node.spouse.title}</span>`:''}</div>`;
+  }
+  slot += `</div>`;
+  let childrenHTML = '';
+  if(node.children && node.children.length){
+    childrenHTML = `<ul>${node.children.map(c=>`<li>${renderNode(c)}</li>`).join('')}</ul>`;
+  }
+  return slot + childrenHTML;
+}
+
+function renderAll(preserveView){
+  // tabs active state
+  [...tabsEl.children].forEach((t,i)=>{
+    const key = Object.keys(branches)[i];
+    t.classList.toggle('active', key===activeBranch);
+  });
+
+  const b = branches[activeBranch];
+  if(!b.root){
+    canvas.innerHTML = `<div class="empty-branch telugu">ఈ శాఖ ఇంకా transcribe చేయలేదు.<br><br><span style="font-family:'Fraunces',serif; font-style:italic; color:var(--ink-soft); font-size:14px;">This branch hasn't been transcribed from the original chart yet — tell Claude which ancestor to zoom in on next and it'll be added here.</span></div>`;
+    return;
+  }
+  reindexActive();
+  canvas.innerHTML = `<ul class="tree"><li>${renderNode(b.root, true)}</li></ul>`;
+  if(!preserveView) resetZoom();
+  attachNodeHandlers();
+}
+
+/* ---------------- NODE CLICK -> DETAIL PANEL ---------------- */
+function attachNodeHandlers(){
+  canvas.querySelectorAll('.node').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      canvas.querySelectorAll('.node.highlight').forEach(x=>x.classList.remove('highlight'));
+      el.classList.add('highlight');
+      const id = el.dataset.id.replace('-spouse','');
+      showPanel(id, el.dataset.id.endsWith('-spouse'));
+    });
+  });
+}
+
+function showPanel(id, isSpouse){
+  const entry = index[id];
+  const panel = document.getElementById('panel');
+  if(!entry){ return; }
+  const node = entry.node;
+  const displayName = isSpouse && node.spouse ? node.spouse.name : node.name;
+  const displayTitle = isSpouse && node.spouse ? (node.spouse.title||'') : (node.title||'');
+
+  let childrenList = '';
+  if(node.children && node.children.length){
+    childrenList = `<div class="p-section"><h5>Children · పిల్లలు</h5><div>${node.children.map(c=>`<span class="pill-link telugu" data-jump="${c.id}">${c.name}</span>`).join('')}</div></div>`;
+  }
+  let parentHTML = '';
+  if(entry.parent){
+    parentHTML = `<div class="p-section"><h5>Parent · తండ్రి</h5><div><span class="pill-link telugu" data-jump="${entry.parent.id}">${entry.parent.name}</span></div></div>`;
+  }
+  let spouseHTML = '';
+  if(node.spouse && !isSpouse){
+    spouseHTML = `<div class="p-section"><h5>Spouse · భార్య/భర్త</h5><p>${node.spouse.name}${node.spouse.title?` — ${node.spouse.title}`:''}</p></div>`;
+  }
+  let noteHTML = node.note ? `<div class="p-section"><h5>Note · గమనిక</h5><div class="p-note">${node.note}</div></div>` : '';
+
+  const editButtons = isSpouse ? '' : `
+    <div class="p-section p-edit-actions">
+      <h5>Add · జోడించు</h5>
+      <div class="edit-btn-row">
+        <button class="edit-btn" data-action="son" data-id="${node.id}">+ కొడుకు<br><span>Son</span></button>
+        <button class="edit-btn" data-action="spouse" data-id="${node.id}">+ జీవిత భాగస్వామి<br><span>Spouse</span></button>
+        ${entry.parent ? `<button class="edit-btn" data-action="sibling" data-id="${node.id}">+ తోబుట్టువు<br><span>Sibling</span></button>` : ''}
+      </div>
+      <div id="edit-form-slot"></div>
+    </div>`;
+
+  panel.innerHTML = `
+    <h3 class="telugu">${displayName}</h3>
+    ${displayTitle?`<div class="p-title telugu">${displayTitle}</div>`:''}
+    ${node.dates?`<div class="p-dates">${node.dates}</div>`:''}
+    ${parentHTML}
+    ${spouseHTML}
+    ${childrenList}
+    ${noteHTML}
+    ${editButtons}
+  `;
+
+  panel.querySelectorAll('[data-jump]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const targetEl = canvas.querySelector(`.node[data-id="${el.dataset.jump}"]`);
+      if(targetEl){
+        targetEl.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+        canvas.querySelectorAll('.node.highlight').forEach(x=>x.classList.remove('highlight'));
+        targetEl.classList.add('highlight');
+        showPanel(el.dataset.jump, false);
+      }
+    });
+  });
+
+  panel.querySelectorAll('.edit-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      showEditForm(btn.dataset.action, btn.dataset.id);
+    });
+  });
+}
+
+/* ---------------- EN -> TELUGU TRANSLITERATION ---------------- */
+function transliterateToTelugu(input){
+  if(!input) return input;
+  if(/[^\x00-\x7F]/.test(input)) return input;
+
+  const VOWELS_INDEP = [
+    ['aa','ఆ'],['ee','ఈ'],['ii','ఈ'],['oo','ఊ'],['uu','ఊ'],
+    ['ai','ఐ'],['au','ఔ'],
+    ['a','అ'],['i','ఇ'],['u','ఉ'],['e','ఎ'],['o','ఒ']
+  ];
+  const VOWELS_MATRA = [
+    ['aa','ా'],['ee','ీ'],['ii','ీ'],['oo','ూ'],['uu','ూ'],
+    ['ai','ై'],['au','ౌ'],
+    ['a',''],['i','ి'],['u','ు'],['e','ె'],['o','ొ']
+  ];
+  // Case-SENSITIVE, longest-first. Uppercase = retroflex/special; lowercase = common default.
+  const CONSONANTS = [
+    ['ksh','క్ష'],['gy','జ్ఞ'],['jn','జ్ఞ'],
+    ['kh','ఖ'],['gh','ఘ'],['chh','ఛ'],['ch','చ'],['jh','ఝ'],['ny','ఞ'],
+    ['th','థ'],['dh','ధ'],['ph','ఫ'],['bh','భ'],['shh','ష'],['sh','శ'],['Sh','ష'],
+    ['T','ట'],['Th','ఠ'],['D','డ'],['Dh','ఢ'],['N','ణ'],['L','ళ'],
+    ['k','క'],['g','గ'],['c','చ'],['j','జ'],
+    ['t','త'],['d','ద'],['n','న'],
+    ['p','ప'],['f','ఫ'],['b','బ'],['m','మ'],
+    ['y','య'],['r','ర'],['l','ల'],['v','వ'],['w','వ'],
+    ['s','స'],['h','హ'],['z','జ'],['x','క్ష'],['q','క']
+  ].sort((a,b)=>b[0].length-a[0].length);
+  const VIRAMA = '్', ANUSVARA = 'ం';
+
+  const SPECIAL_CASE_KEYS = new Set(['T','Th','D','Dh','N','L','Sh']); // these MUST stay uppercase to mean retroflex; everything else matches case-insensitively
+  function matchCS(pos, list){
+    const atWordStart = pos===0 || /[^a-zA-Z]/.test(input[pos-1]||' ');
+    for(const [k,v] of list){
+      if(SPECIAL_CASE_KEYS.has(k)){
+        if(atWordStart) continue; // never treat a word-initial capital as an intentional retroflex marker
+        if(input.substr(pos,k.length) === k) return [k, v];
+      } else {
+        if(input.substr(pos,k.length).toLowerCase() === k.toLowerCase()) return [k, v];
+      }
+    }
+    return null;
+  }
+  function isConsLetter(pos){
+    // does a consonant token start at pos (case-sensitive)?
+    return !!matchCS(pos, CONSONANTS);
+  }
+  function isVowelChar(c){ return /[aeiouAEIOU]/.test(c||''); }
+
+  let out = '';
+  let i = 0;
+  const s = input;
+  const n = s.length;
+
+  while(i < n){
+    const ch = s[i];
+    if(/[^a-zA-Z]/.test(ch)){ out += ch; i++; continue; }
+
+    // Gemination: identical consecutive letters (yy, kk, tt, ll, ss, pp, bb, gg, vv, rr, mm, nn), lowercase only
+    const c0 = s[i], c1 = s[i+1];
+    if(c1 && c0 === c1 && /[a-z]/.test(c0) && !isVowelChar(c0)){
+      const single = matchCS(i, CONSONANTS) || (c0==='n'?['n','న']:c0==='m'?['m','మ']:null);
+      if(single){
+        const vow = matchCS(i+2, VOWELS_MATRA);
+        out += single[1] + VIRAMA + single[1] + (vow ? vow[1] : '');
+        i += 2 + (vow ? vow[0].length : 0);
+        continue;
+      }
+    }
+
+    const cons = matchCS(i, CONSONANTS);
+    if(cons){
+      let consChar = cons[1];
+      i += cons[0].length;
+      const vow = matchCS(i, VOWELS_MATRA);
+      const hasVowel = !!vow;
+      // n/m with inherent 'a' (no explicit vowel) and followed by another consonant -> anusvara
+      if((cons[0]==='n' || cons[0]==='m') && !hasVowel && i<n && !isVowelChar(s[i]) && isConsLetter(i)){
+        out += ANUSVARA;
+        continue;
+      }
+      if(vow){ out += consChar + vow[1]; i += vow[0].length; }
+      else { out += consChar; }
+      continue;
+    }
+    const vind = matchCS(i, VOWELS_INDEP);
+    if(vind){ out += vind[1]; i += vind[0].length; continue; }
+    out += ch; i++;
+  }
+  return out;
+}
+
+function showEditForm(action, nodeId){
+  const slot = document.getElementById('edit-form-slot');
+  if(!slot) return;
+  const labels = {
+    son: {te:'కొడుకు జోడించు', en:'Add son'},
+    spouse: {te:'జీవిత భాగస్వామి జోడించు', en:'Add spouse'},
+    sibling: {te:'తోబుట్టువు జోడించు', en:'Add sibling'}
+  };
+  const l = labels[action];
+  slot.innerHTML = `
+    <div class="edit-form">
+      <div class="ef-title telugu">${l.te} <span>(${l.en})</span></div>
+      <div class="ef-field-row"><input type="text" id="ef-name" class="telugu" placeholder="పేరు · Name (required)"><button type="button" class="ef-translit-btn" data-target="ef-name" title="Convert English to Telugu">🔤</button></div>
+      <div class="ef-field-row"><input type="text" id="ef-title" class="telugu" placeholder="బిరుదు/వృత్తి · Title (optional)"><button type="button" class="ef-translit-btn" data-target="ef-title" title="Convert English to Telugu">🔤</button></div>
+      <input type="text" id="ef-dates" placeholder="తేదీలు · Dates (optional)">
+      ${action!=='spouse' ? `<div class="ef-field-row"><input type="text" id="ef-spousename" class="telugu" placeholder="జీవిత భాగస్వామి పేరు · Their spouse's name (optional)"><button type="button" class="ef-translit-btn" data-target="ef-spousename" title="Convert English to Telugu">🔤</button></div>` : ''}
+      <div class="ef-hint">Type in English, then tap 🔤 to convert to Telugu · ఇంగ్లీష్‌లో టైప్ చేసి 🔤 నొక్కండి</div>
+      <div class="ef-btn-row">
+        <button id="ef-save" class="ef-save">సేవ్ చేయి · Save</button>
+        <button id="ef-cancel" class="ef-cancel">రద్దు · Cancel</button>
+      </div>
+    </div>`;
+  document.getElementById('ef-name').focus();
+  document.getElementById('ef-cancel').addEventListener('click', ()=>{ slot.innerHTML=''; });
+  slot.querySelectorAll('.ef-translit-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const inp = document.getElementById(btn.dataset.target);
+      if(inp && inp.value.trim()) inp.value = transliterateToTelugu(inp.value);
+      inp.focus();
+    });
+  });
+  document.getElementById('ef-save').addEventListener('click', ()=>{
+    const name = document.getElementById('ef-name').value.trim();
+    if(!name){ document.getElementById('ef-name').focus(); return; }
+    const title = document.getElementById('ef-title').value.trim();
+    const dates = document.getElementById('ef-dates').value.trim();
+    const spouseNameEl = document.getElementById('ef-spousename');
+    const spouseName = spouseNameEl ? spouseNameEl.value.trim() : '';
+
+    const opts = {};
+    if(title) opts.title = title;
+    if(dates) opts.dates = dates;
+    if(spouseName) opts.spouse = {name: spouseName};
+
+    const entry = index[nodeId];
+    if(!entry) return;
+
+    if(action === 'spouse'){
+      entry.node.spouse = {name, title: title||''};
+    } else if(action === 'son'){
+      if(!entry.node.children) entry.node.children = [];
+      entry.node.children.push(n(name, opts));
+    } else if(action === 'sibling'){
+      if(entry.parent){
+        if(!entry.parent.children) entry.parent.children = [];
+        entry.parent.children.push(n(name, opts));
+      }
+    }
+    renderAll(true);
+    showPanel(nodeId, false);
+  });
+}
+
+/* ---------------- ZOOM & PAN ---------------- */
+let zoom = 1;
+function applyZoom(){ canvas.style.transform = `scale(${zoom})`; }
+function resetZoom(){ zoom = 1; applyZoom(); }
+document.getElementById('zoom-in').addEventListener('click', ()=>{ zoom = Math.min(zoom+0.1, 1.6); applyZoom(); });
+document.getElementById('zoom-out').addEventListener('click', ()=>{ zoom = Math.max(zoom-0.1, 0.4); applyZoom(); });
+document.getElementById('zoom-reset').addEventListener('click', resetZoom);
+
+const wrap = document.getElementById('canvas-wrap');
+wrap.addEventListener('wheel', (e)=>{
+  if(!e.ctrlKey) return;
+  e.preventDefault();
+  zoom = Math.min(1.6, Math.max(0.4, zoom + (e.deltaY<0?0.08:-0.08)));
+  applyZoom();
+}, {passive:false});
+
+let isDown=false, startX, startY, scrollLeft, scrollTop;
+wrap.addEventListener('mousedown', (e)=>{
+  isDown=true; wrap.classList.add('dragging');
+  startX = e.pageX; startY = e.pageY;
+  scrollLeft = wrap.scrollLeft; scrollTop = wrap.scrollTop;
+});
+window.addEventListener('mouseup', ()=>{ isDown=false; wrap.classList.remove('dragging'); });
+wrap.addEventListener('mouseleave', ()=>{ isDown=false; wrap.classList.remove('dragging'); });
+wrap.addEventListener('mousemove', (e)=>{
+  if(!isDown) return;
+  e.preventDefault();
+  wrap.scrollLeft = scrollLeft - (e.pageX - startX);
+  wrap.scrollTop = scrollTop - (e.pageY - startY);
+});
+
+/* Touch support: one-finger pan, two-finger pinch-to-zoom (for phones/tablets/iPads) */
+let touchMode = null; // 'pan' | 'pinch'
+let touchStartX=0, touchStartY=0, touchScrollLeft=0, touchScrollTop=0;
+let pinchStartDist=0, pinchStartZoom=1;
+
+function touchDist(t0,t1){
+  const dx = t0.clientX - t1.clientX, dy = t0.clientY - t1.clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+wrap.addEventListener('touchstart', (e)=>{
+  if(e.touches.length === 1){
+    touchMode = 'pan';
+    touchStartX = e.touches[0].pageX;
+    touchStartY = e.touches[0].pageY;
+    touchScrollLeft = wrap.scrollLeft;
+    touchScrollTop = wrap.scrollTop;
+  } else if(e.touches.length === 2){
+    touchMode = 'pinch';
+    pinchStartDist = touchDist(e.touches[0], e.touches[1]);
+    pinchStartZoom = zoom;
+  }
+}, {passive:true});
+
+wrap.addEventListener('touchmove', (e)=>{
+  if(touchMode === 'pan' && e.touches.length === 1){
+    e.preventDefault();
+    wrap.scrollLeft = touchScrollLeft - (e.touches[0].pageX - touchStartX);
+    wrap.scrollTop = touchScrollTop - (e.touches[0].pageY - touchStartY);
+  } else if(touchMode === 'pinch' && e.touches.length === 2){
+    e.preventDefault();
+    const newDist = touchDist(e.touches[0], e.touches[1]);
+    const ratio = newDist / (pinchStartDist || newDist);
+    zoom = Math.min(1.6, Math.max(0.4, pinchStartZoom * ratio));
+    applyZoom();
+  }
+}, {passive:false});
+
+wrap.addEventListener('touchend', (e)=>{
+  if(e.touches.length === 0) touchMode = null;
+  else if(e.touches.length === 1){
+    // dropped from pinch to single-finger — restart pan reference point
+    touchMode = 'pan';
+    touchStartX = e.touches[0].pageX;
+    touchStartY = e.touches[0].pageY;
+    touchScrollLeft = wrap.scrollLeft;
+    touchScrollTop = wrap.scrollTop;
+  }
+});
+
+/* ---------------- PRINT ---------------- */
+document.getElementById('print-btn').addEventListener('click', ()=> window.print());
+
+/* ---------------- EXPORT DATA (serialize live tree back to n(...) code) ---------------- */
+function esc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function serializeNode(node, indent){
+  const pad = '  '.repeat(indent);
+  const opts = [];
+  if(node.title) opts.push(`title:'${esc(node.title)}'`);
+  if(node.dates) opts.push(`dates:'${esc(node.dates)}'`);
+  if(node.note) opts.push(`note:'${esc(node.note)}'`);
+  if(node.placeholder) opts.push(`placeholder:true`);
+  if(node.spouse) opts.push(`spouse:{name:'${esc(node.spouse.name)}'${node.spouse.title?`, title:'${esc(node.spouse.title)}'`:''}}`);
+  if(node.children && node.children.length){
+    const kids = node.children.map(c=>serializeNode(c, indent+1)).join(',\n');
+    opts.push(`children:[\n${kids}\n${pad}]`);
+  }
+  const optsStr = opts.length ? `, {${opts.join(', ')}}` : '';
+  return `${pad}n('${esc(node.name)}'${optsStr})`;
+}
+function exportAllData(){
+  let out = '';
+  out += '// ===== branch1 (పద్దప్ప) =====\n';
+  out += `const branch1 = ${serializeNode(branch1,0).trim()};\n\n`;
+  out += '// ===== branch2 (నరసప్ప) =====\n';
+  out += `const branch2 = ${serializeNode(branch2,0).trim()};\n\n`;
+  out += '// ===== branch3 (వెంకప్ప గ్రధ్రుప్యాలికి — position unconfirmed) =====\n';
+  out += `const branch3 = ${serializeNode(branch3,0).trim()};\n\n`;
+  out += '// ===== branch4 (వెంకప్ప గుర్రపుస్వారీకి / Son 3) =====\n';
+  out += `const branch4 = ${serializeNode(branch4,0).trim()};\n`;
+  return out;
+}
+document.getElementById('export-data-btn').addEventListener('click', ()=>{
+  document.getElementById('export-textarea').value = exportAllData();
+  document.getElementById('export-modal').style.display = 'flex';
+});
+document.getElementById('export-modal-close').addEventListener('click', ()=>{
+  document.getElementById('export-modal').style.display = 'none';
+});
+document.getElementById('export-modal').addEventListener('click', (e)=>{
+  if(e.target.id === 'export-modal') document.getElementById('export-modal').style.display = 'none';
+});
+document.getElementById('export-copy-btn').addEventListener('click', ()=>{
+  const ta = document.getElementById('export-textarea');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    const btn = document.getElementById('export-copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(()=>{ btn.textContent = orig; }, 1500);
+  }).catch(()=>{ document.execCommand('copy'); });
+});
+document.getElementById('export-download-btn').addEventListener('click', ()=>{
+  const blob = new Blob([document.getElementById('export-textarea').value], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'vamsha-vruksham-data-export.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+/* ---------------- SEARCH ---------------- */
+const searchInput = document.getElementById('search');
+const resultsEl = document.getElementById('search-results');
+searchInput.addEventListener('input', ()=>{
+  const q = searchInput.value.trim();
+  if(!q){ resultsEl.classList.remove('show'); return; }
+  const matches = Object.values(index).filter(e => e.node.name.includes(q)).slice(0,20);
+  if(!matches.length){
+    resultsEl.innerHTML = `<div class="sr-item telugu">ఫలితాలు లేవు · no matches</div>`;
+  } else {
+    resultsEl.innerHTML = matches.map(m=>`
+      <div class="sr-item telugu" data-id="${m.node.id}" data-branch="${m.branchKey}">
+        ${m.node.name}
+        <div class="sr-branch">${branches[m.branchKey].label}</div>
+      </div>`).join('');
+  }
+  resultsEl.classList.add('show');
+  resultsEl.querySelectorAll('.sr-item[data-id]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const branchKey = el.dataset.branch;
+      const id = el.dataset.id;
+      resultsEl.classList.remove('show');
+      searchInput.value='';
+      if(activeBranch !== branchKey){ activeBranch = branchKey; renderAll(); }
+      requestAnimationFrame(()=>{
+        const targetEl = canvas.querySelector(`.node[data-id="${id}"]`);
+        if(targetEl){
+          targetEl.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+          targetEl.classList.add('highlight');
+          showPanel(id, false);
+        }
+      });
+    });
+  });
+});
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.search-wrap')) resultsEl.classList.remove('show');
+});
+
+/* ---------------- INITIAL RENDER (must run after zoom/pan vars exist) ---------------- */
+renderAll();
+</script>
+</body>
+</html>
